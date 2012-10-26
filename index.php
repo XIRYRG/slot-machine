@@ -6,17 +6,29 @@
     </head>
     <body>
         <?php
+          require_once 'jsonRPCServer.php'; 
+          require 'example.php';
           require_once 'appconfig.php';
-          function dump_it($var){
-            echo '<pre>';
-            var_dump($_COOKIE);
-            var_dump($_SESSION);
-            echo '</pre>';
+          $myExample = new example();
+
+          // performs some basic operation
+          echo '<b>Attempt to perform basic operations</b><br />'."\n";
+          try {
+            echo 'Your name is <i>'.$myExample->giveMeSomeData('name').'</i><br />'."\n";
+            $myExample->changeYourState('I am using this function from the local environement');
+            echo 'Your status request has been accepted<br />'."\n";
+          } catch (Exception $e) {
+            echo nl2br($e->getMessage()).'<br />'."\n";
           }
-          session_start();
-          if (SetCookie("Test","Value", $NOW_PLUS_ONE_YEAR, '/'))
-            echo "<h3>Cookies set successfully!</h3>";
-        dump_it($NOW_PLUS_ONE_YEAR);
+
+          // performs some strategic operation, locally allowed
+          echo '<br /><b>Attempt to store strategic data</b><br />'."\n";
+          try {
+            $myExample->writeSomething('Strategic string!');
+            echo 'Strategic data succefully stored';
+          } catch (Exception $e) {
+            echo nl2br($e->getMessage());
+          }
         ?>
     </body>
 </html>
