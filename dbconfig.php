@@ -40,13 +40,13 @@ class dbconfig {
         exit;
       }
       else{
-        echo 'Connected...';
+        //echo 'Connected...';
       }
       mysql_select_db($this->dbname, $link);
     }
     function mysql_pconnect(){
       $this->config_filling();
-      echo 'mysql_pconnect';
+      //echo 'mysql_pconnect';
       $link = mysql_pconnect($this->hostname, $this->username, $this->pass);
       // try to connect for MySQL
       if (!$link) {
@@ -55,13 +55,13 @@ class dbconfig {
         exit;
       }
       else{
-        echo 'Connected...';
+        //echo 'Connected...';
       }
       mysql_select_db($this->dbname);
-      $result = mysql_query("SELECT * FROM users", $link);
-      while($row = mysql_fetch_array($result)){
-        dump_it($row);
-      }
+      //$result = mysql_query("SELECT * FROM users", $link);
+      //while($row = mysql_fetch_array($result)){
+        //dump_it($row);
+      //}
     }
     function query($query_string){
       mysql_real_escape_string($query_string);
@@ -70,14 +70,14 @@ class dbconfig {
     }
     function mysql_fetch_array($query_string){
       $q = $this->query($query_string);
-      dump_it($q);
+      /*
       while($row = mysql_fetch_array($q)){
+        echo 'row=';
         dump_it($row);
-      }
+      }*/
+      return mysql_fetch_array($q);
     }
 }
 $db = dbconfig::get_instance();
 $db->mysql_pconnect();
-$db->mysql_fetch_array("SELECT * FROM users");
-
 ?>
