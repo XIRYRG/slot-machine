@@ -14,9 +14,8 @@
             echo '</pre>';
           }
           session_start();
-          //$NOW_PLUS_ONE_YEAR = time()+60*60*24*366;
           if (SetCookie("Test","Value", $NOW_PLUS_ONE_YEAR, '/'))
-            echo "<h3>Cookies успешно установлены!</h3>";
+            echo "<h3>Cookies set successfully!</h3>";
         dump_it($NOW_PLUS_ONE_YEAR);
         ?>
     </body>

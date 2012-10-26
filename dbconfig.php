@@ -34,9 +34,9 @@ class dbconfig {
   }
     function mysql_connect(){
       $link = mysql_connect($this->hostname, $this->username, $this->pass);
-      // Попытка установить соединение с MySQL:
+      // try to connect for MySQL
       if (!$link) {
-        echo "Ошибка подключения к серверу MySQL";
+        echo "MySQL connection error";
         exit;
       }
       else{
@@ -48,9 +48,9 @@ class dbconfig {
       $this->config_filling();
       echo 'mysql_pconnect';
       $link = mysql_pconnect($this->hostname, $this->username, $this->pass);
-      // Попытка установить соединение с MySQL:
+      // try to connect for MySQL
       if (!$link) {
-        echo "Ошибка подключения к серверу MySQL";
+        echo "MySQL connection error";
         echo mysql_error();
         exit;
       }
