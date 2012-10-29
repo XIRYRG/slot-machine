@@ -2,6 +2,7 @@
 require_once 'appconfig.php';
 require_once 'dumpit.php';
 require_once 'dbconfig.php';
+require_once 'Instawallet.php';
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
@@ -40,8 +41,8 @@ class User {
   }
   function reg(){
     $this->phpsessid = session_id();
-    //todo: use uniqid
-    $this->uid = sha1(session_id());
+    //$this->uid = sha1(session_id());
+    $this->uid = sha1(uniqid(""));
     //todo: include a btc library and generate addr
     $this->btc_recieve_address = 'AAAAAa';
     $this->money_balance = 0;
@@ -92,4 +93,11 @@ dump_it(unserialize($u1_serialized));
 //echo '<br>';
 //echo $uid = sha1(session_id());
 //$u1->auth();
+
+
+$w1 = new Instawallet();
+$w1->new_wallet_curl();
+$w1->payment_curl($w1->wallet_id, '1NWPkVs7q9SQuvbo6oizatR7mPtnZB18Qb', 1000000);
+dump_it($w1);
+
 ?>
