@@ -159,5 +159,10 @@ class Instawallet {
     echo $data->message;
 		return json_decode($json);
 	}
+  function get_sender_address(){
+    //http://www.bitcoinforum.com/security-technical-support-and-tutorials/how-to-find-out-the-sender-address/
+    //http://blockexplorer.com/q/mytransactions/1Cvvr8AsCfbbVQ2xoWiFD1Gb2VRbGsEf28
+    //https://bitcointalk.org/index.php?topic=112741.0
+  }
 }
 ?>
