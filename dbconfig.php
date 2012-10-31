@@ -17,20 +17,12 @@ class dbconfig {
   public $username, $hostname, $pass, $dbname;
 
   function config_filling(){
-    /*
+    
     $this->dbname = 'slot_db';
     $this->username = 'slot_user';
-    $this->hostname = 'localhost:3306';
+    $this->hostname = 'localhost';
     $this->pass = 'slot_pass';
     $this->port = 3306;
-     */
-
-    $this->dbname = 'slot_db';
-    $this->username = 'root';
-    $this->hostname = 'localhost:3306';
-    $this->pass = '';
-    $this->port = 3306;
-
   }
     function mysql_connect(){
       $link = mysql_connect($this->hostname, $this->username, $this->pass);
