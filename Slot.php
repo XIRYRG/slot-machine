@@ -14,6 +14,7 @@
 require_once 'appconfig.php';
 require_once 'dumpit.php';
 require_once 'Symbol.php';
+require_once 'Reel.php';
 
 class Slot {
   //make it singletone
@@ -34,7 +35,11 @@ class Slot {
   protected $last_payline, $reels = array(3);
   //return new randomly generated payline
   public function get_new_payline(){
-    
+    for ($i = 0; $i < 3; $i++){
+      $syms[$i] = $this->reels[$i]->get_new_randomly_generated_symbol();
+    }
+    $new_payline = new Payline($sym1, $sym2, $sym3);
+    return $new_payline;
   }
   
 }
@@ -54,7 +59,9 @@ class WeightTable{
     return self::$weight_table;
   }
   
-  protected $reel1,$reel2,$reel3;
+  //protected
+          public $reel1,$reel2,$reel3;
+  public $reel1;
   function weight_table_filling(){
     $this->reel1[Symbol::$pyramid] = 4;
     $this->reel1[Symbol::$bitcoin] = 5;
@@ -81,9 +88,31 @@ class WeightTable{
     $this->reel3[Symbol::$blank] = 42;
     //total: 64 for every reel
   }
+  //$this->reel1
+  //return the filled line (array) that consists of 64 symbols considering the weight table
+  function get_symbols_reel_line($reel){
+    //weight_arr == reel line
+    $weight_arr = array(64);
+    $current_num_in_weight_arr = 0;//counter in weight_arr
+    //for every symbol
+    foreach ($reel as $key => $value) {
+      for ($i = 0; $i < $reel[$key]; $i++){
+        $weight_arr[$current_num_in_weight_arr] = $key;
+        //total number of processed cells
+        $current_num_in_weight_arr++;
+      }
+    }
+    echo $current_num_in_weight_arr;
+    return $weight_arr;
+  }
 }
 
 $w1 = WeightTable::get_instance();
-dump_it($w1);
+$line1 = $w1->get_symbols_reel_line($w1->reel1);
+dump_it($line1);
+$line2 = $w1->get_symbols_reel_line($w1->reel2);
+dump_it($line2);
+$line3 = $w1->get_symbols_reel_line($w1->reel3);
+dump_it($line3);
 
 ?>
