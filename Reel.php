@@ -11,7 +11,9 @@
  * @author vadim24816
  */
 class Reel {
-  
+  public function __construct() {
+    ;
+  }
 }
 
 ?>
