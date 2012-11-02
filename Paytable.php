@@ -42,6 +42,7 @@ class Paytable {
     $this->peace_3 = new Payline(Symbol::$peace, Symbol::$peace, Symbol::$peace);
     $this->bitcoin_2 = new Payline(Symbol::$bitcoin, Symbol::$bitcoin, Symbol::$any);
     $this->bitcoin_1 = new Payline(Symbol::$bitcoin, Symbol::$any, Symbol::$any);
+    $this->blank_3 = new Payline(Symbol::$blank, Symbol::$blank, Symbol::$blank);
   }
   //compare given payline with win payline
   public function paylines_matching_with_wins($payline){
@@ -76,6 +77,10 @@ class Paytable {
       case $this->peace_3:
         //return 25;
         return 'peace_3';
+        break;
+      case $this->blank_3:
+        //return 0;
+        return 'blank_3';
         break;
       //something else
       default:

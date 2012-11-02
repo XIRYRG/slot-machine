@@ -135,7 +135,7 @@ echo ' ';
  */
 
 function show_generated_total_weight_table() {
-  echo 'generated total weight table';
+  echo 'generated the number  of appearances table';
   $w1 = WeightTable::get_instance();
   echo '<table border=1px>';
   echo '<tr>';
@@ -163,6 +163,9 @@ function show_generated_total_weight_table() {
     echo '</td>';
     echo '<td>';
     echo Symbol::$blank;
+    echo '</td>';
+    echo '<td>';
+    echo 'Sum';
     echo '</td>';
     echo '</tr>';
   $number_of_symbol = array();
@@ -236,6 +239,14 @@ function show_generated_total_weight_table() {
     echo '<td>';
     echo $number_of_symbol[$reel_num][Symbol::$blank];
     echo '</td>';
+    echo '<td>';
+    $sum = 0;
+    foreach ($number_of_symbol[$reel_num] as $key => $value) {
+      $sum += $value;
+    }
+    
+    echo $sum;
+    echo '</td>';
     
     echo '</tr>';
   }
@@ -285,7 +296,7 @@ function possible_combinations(){
       case 'peace_3': 
         $number_of_win_lines[Symbol::$peace]++;
         break;
-      case 'blank': 
+      case 'blank_3': 
         $number_of_win_lines[Symbol::$blank]++;
         break;
       case 'bitcoin_2': 
@@ -299,7 +310,7 @@ function possible_combinations(){
         break;
     }
   }
-  
+  echo 'Table of amount of wins for 262144 stops (the most combinations (excepts bitcoin_2 - any 2 are bitcoins, bitcoin_1 - any 1 is bitcoin and lose) for 3 symbols )';
   echo '<tr>';
   echo '<td>';
   echo 'win combination';
