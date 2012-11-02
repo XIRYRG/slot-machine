@@ -61,32 +61,45 @@ class WeightTable{
   
   //protected
           public $reel1,$reel2,$reel3;
-  public $reel1;
+  public $symbol_weight_reel1,$symbol_weight_reel2,$symbol_weight_reel3;
   function weight_table_filling(){
-    $this->reel1[Symbol::$pyramid] = 4;
-    $this->reel1[Symbol::$bitcoin] = 5;
-    $this->reel1[Symbol::$anonymous] = 6;
-    $this->reel1[Symbol::$onion] = 6;
-    $this->reel1[Symbol::$anarchy] = 7;
-    $this->reel1[Symbol::$peace] = 8;
-    $this->reel1[Symbol::$blank] = 28;
+    //the symbol weight on reelN
+    $this->symbol_weight_reel1[Symbol::$pyramid] = 4;
+    $this->symbol_weight_reel1[Symbol::$bitcoin] = 5;
+    $this->symbol_weight_reel1[Symbol::$anonymous] = 6;
+    $this->symbol_weight_reel1[Symbol::$onion] = 6;
+    $this->symbol_weight_reel1[Symbol::$anarchy] = 7;
+    $this->symbol_weight_reel1[Symbol::$peace] = 8;
+    $this->symbol_weight_reel1[Symbol::$blank] = 28;
     
-    $this->reel2[Symbol::$pyramid] = 3;
-    $this->reel2[Symbol::$bitcoin] = 4;
-    $this->reel2[Symbol::$anonymous] = 4;
-    $this->reel2[Symbol::$onion] = 5;
-    $this->reel2[Symbol::$anarchy] = 5;
-    $this->reel2[Symbol::$peace] = 6;
-    $this->reel2[Symbol::$blank] = 37;
+    $this->symbol_weight_reel2[Symbol::$pyramid] = 3;
+    $this->symbol_weight_reel2[Symbol::$bitcoin] = 4;
+    $this->symbol_weight_reel2[Symbol::$anonymous] = 4;
+    $this->symbol_weight_reel2[Symbol::$onion] = 5;
+    $this->symbol_weight_reel2[Symbol::$anarchy] = 5;
+    $this->symbol_weight_reel2[Symbol::$peace] = 6;
+    $this->symbol_weight_reel2[Symbol::$blank] = 37;
     
-    $this->reel3[Symbol::$pyramid] = 1;
-    $this->reel3[Symbol::$bitcoin] = 2;
-    $this->reel3[Symbol::$anonymous] = 3;
-    $this->reel3[Symbol::$onion] = 4;
-    $this->reel3[Symbol::$anarchy] = 6;
-    $this->reel3[Symbol::$peace] = 6;
-    $this->reel3[Symbol::$blank] = 42;
+    $this->symbol_weight_reel3[Symbol::$pyramid] = 1;
+    $this->symbol_weight_reel3[Symbol::$bitcoin] = 2;
+    $this->symbol_weight_reel3[Symbol::$anonymous] = 3;
+    $this->symbol_weight_reel3[Symbol::$onion] = 4;
+    $this->symbol_weight_reel3[Symbol::$anarchy] = 6;
+    $this->symbol_weight_reel3[Symbol::$peace] = 6;
+    $this->symbol_weight_reel3[Symbol::$blank] = 42;
     //total: 64 for every reel
+    
+    $this->reel1 = new Reel('reel1');
+    $this->reel1->reel_line = $this->get_symbols_reel_line($this->symbol_weight_reel1);
+    $this->reel2 = new Reel('reel2');
+    $this->reel2->reel_line = $this->get_symbols_reel_line($this->symbol_weight_reel2);
+    $this->reel3 = new Reel('reel3');
+    $this->reel3->reel_line = $this->get_symbols_reel_line($this->symbol_weight_reel3);
+    /*
+    $this->reel1_line = $this->get_symbols_reel_line($this->reel1);
+    $this->reel2_line = $this->get_symbols_reel_line($this->reel2);
+    $this->reel3_line = $this->get_symbols_reel_line($this->reel3);
+    */
   }
   //$this->reel1
   //return the filled line (array) that consists of 64 symbols considering the weight table
@@ -102,17 +115,16 @@ class WeightTable{
         $current_num_in_weight_arr++;
       }
     }
-    echo $current_num_in_weight_arr;
+    //echo $current_num_in_weight_arr;
     return $weight_arr;
   }
 }
 
 $w1 = WeightTable::get_instance();
-$line1 = $w1->get_symbols_reel_line($w1->reel1);
-dump_it($line1);
-$line2 = $w1->get_symbols_reel_line($w1->reel2);
-dump_it($line2);
-$line3 = $w1->get_symbols_reel_line($w1->reel3);
-dump_it($line3);
-
+echo $w1->reel1->get_new_randomly_choosed_symbol();
+echo ' ';
+echo $w1->reel2->get_new_randomly_choosed_symbol();
+echo ' ';
+echo $w1->reel3->get_new_randomly_choosed_symbol();
+echo ' ';
 ?>
