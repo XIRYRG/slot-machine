@@ -47,44 +47,53 @@ class Paytable {
   public function paylines_matching_with_wins($payline){
     switch ($payline){
       //3 matches
+      //echo 'pyramid_3';
       case $this->pyramid_3:
-        echo 'pyramid_3';
-        return 5000;
+        //return 5000;
+        return 'pyramid_3';
         break;
+      //echo 'bitcoin_3';
       case $this->bitcoin_3:
-        echo 'bitcoin_3';
-        return 1000;
+        //return 1000;
+        return 'bitcoin_3';
         break;
+      //echo 'anonymous_3';
       case $this->anonymous_3:
-        echo 'anonymous_3';
-        return 200;
+        //return 200;
+        return 'anonymous_3';
         break;
+      //echo 'onion_3';
       case $this->onion_3:
-        echo 'onion_3';
-        return 100;
+        //return 100;
+        return 'onion_3';
         break;
+      //echo 'anarchy_3';
       case $this->anarchy_3:
-        echo 'anarchy_3';
-        return 50;
+        //return 50;
+        return 'anarchy_3';
         break;
+      //echo 'peace_3';
       case $this->peace_3:
-        echo 'peace_3';
-        return 25;
+        //return 25;
+        return 'peace_3';
         break;
       //something else
       default:
         //bitcoin_2
+        //echo 'bitcoin_2';
         if ($this->amount_of_symbols_in_payline($payline, Symbol::$bitcoin) == 2){
-          echo 'bitcoin_2';
-          return 10;
+          //return 10;
+          return 'bitcoin_2';
         }
         //bitcoin_1
+        //echo 'bitcoin_1';
         if ($this->amount_of_symbols_in_payline($payline, Symbol::$bitcoin) == 1){
-          echo 'bitcoin_1';
-          return 2;
+          //return 2;
+          return 'bitcoin_1';
         }
-        echo 'you are not win';
-        return 0;
+        //echo 'you are not win';
+        //return 0;
+        return 'lose';
     }
   }
   //return amount of secific symbol in 

@@ -18,6 +18,7 @@ class Reel {
     $this->name;
   }
   public function get_new_randomly_choosed_symbol(){
+    //reinit generator
     mt_srand();
     //choose the symbol number
     $rand_num = mt_rand(0, 63);
