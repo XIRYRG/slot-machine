@@ -113,6 +113,102 @@ class Paytable {
     }
     return $amount;
   }
+  //return payoffs for given payline
+  public function payoff_value($payline){
+    switch ($payline){
+      //3 matches
+      //echo 'pyramid_3';
+      case $this->pyramid_3:
+        return 5000;
+        break;
+      //echo 'bitcoin_3';
+      case $this->bitcoin_3:
+        return 1000;
+        break;
+      //echo 'anonymous_3';
+      case $this->anonymous_3:
+        return 200;
+        break;
+      //echo 'onion_3';
+      case $this->onion_3:
+        return 100;
+        break;
+      //echo 'anarchy_3';
+      case $this->anarchy_3:
+        return 50;
+        break;
+      //echo 'peace_3';
+      case $this->peace_3:
+        return 25;
+        break;
+      case $this->blank_3:
+        return 0;
+        break;
+      //something else
+      default:
+        //bitcoin_2
+        //echo 'bitcoin_2';
+        if ($this->amount_of_symbols_in_payline($payline, Symbol::$bitcoin) == 2){
+          return 10;
+        }
+        //bitcoin_1
+        //echo 'bitcoin_1';
+        if ($this->amount_of_symbols_in_payline($payline, Symbol::$bitcoin) == 1){
+          return 2;
+        }
+        //echo 'you are not win';
+        return 0;
+    }
+  }
+  
+  public function payoff_value_by_name($combination_name){
+    switch ($combination_name){
+      //3 matches
+      //echo 'pyramid_3';
+      case 'pyramid_3':
+        return 5000;
+        break;
+      //echo 'bitcoin_3';
+      case 'bitcoin_3':
+        return 1000;
+        break;
+      //echo 'anonymous_3';
+      case 'anonymous_3':
+        return 200;
+        break;
+      //echo 'onion_3';
+      case 'onion_3':
+        return 100;
+        break;
+      //echo 'anarchy_3';
+      case 'anarchy_3':
+        return 50;
+        break;
+      //echo 'peace_3';
+      case 'peace_3':
+        return 25;
+        break;
+      //echo 'blank_3';
+      case 'blank_3':
+        return 0;
+        break;
+      //bitcoin_2
+      //echo 'bitcoin_2';
+      case 'bitcoin_2':
+        return 10;
+        break;
+      //bitcoin_1
+      //echo 'bitcoin_1';
+      case 'bitcoin_1':
+        return 2;
+        break;
+      //something else
+      default:
+        //echo 'you are not win';
+        return 0;
+    }
+  }
+  
 }
 
 $paytable1 = Paytable::get_instance();
