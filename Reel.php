@@ -26,7 +26,7 @@ class Reel {
     //choose the symbol number
     //$rand_num = mt_rand(0, 63);
     $randomizer = Randomizer::get_instance();
-    //$randomizer->srand();//reinit
+    $randomizer->mt_srand();//reinit
     $rand_num = $randomizer->mt_rand();
     
     
