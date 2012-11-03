@@ -93,11 +93,13 @@ class WeightTable{
     //total: 64 for every reel
     
     $this->reel1 = new Reel('reel1');
-    //$this->reel1->reel_line = $this->get_symbols_reel_line($this->symbol_weight_reel1);
+    $this->reel1->reel_line = $this->get_symbols_reel_line($this->symbol_weight_reel1);
     $this->reel2 = new Reel('reel2');
-    //$this->reel2->reel_line = $this->get_symbols_reel_line($this->symbol_weight_reel2);
+    $this->reel2->reel_line = $this->get_symbols_reel_line($this->symbol_weight_reel2);
     $this->reel3 = new Reel('reel3');
-    //$this->reel3->reel_line = $this->get_symbols_reel_line($this->symbol_weight_reel3);
+    $this->reel3->reel_line = $this->get_symbols_reel_line($this->symbol_weight_reel3);
+    
+    //weight table filling, not total weight
     $this->weight_table_filling();
     /*
     $this->reel1_line = $this->get_symbols_reel_line($this->reel1);
@@ -391,7 +393,7 @@ function possible_combinations(){
   echo 'money ( probability * payoff = )';
   echo '</td>';
   echo '<td>';
-  echo 'money return (to player)';
+  echo 'money returning (to player)';
   echo '</td>';
   echo '</tr>';
   $total_sum = 0;
