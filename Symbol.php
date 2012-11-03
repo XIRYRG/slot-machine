@@ -19,7 +19,7 @@ class Symbol {
   public static $onion = 'onion';//watermelons=onion
   public static $anarchy = 'anarchy';//oranges=anarchy
   public static $peace = 'peace';//lemons=peace logo
-  public static $blank = 'blank';//lemons=peace logo
+  public static $blank = 'blank';//
   public static $any = 'any';//any symbol [from blank to pyramid]
   //if symbol was given return true, false else.
   public static function is_symbol($sym){

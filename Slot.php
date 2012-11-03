@@ -56,7 +56,7 @@ class WeightTable{
   public static function get_instance(){
     if (is_null(self::$weight_table)){
       self::$weight_table = new WeightTable();
-      self::$weight_table->weight_table_filling();
+      self::$weight_table->total_weight_table_filling();
       return self::$weight_table;
     }
     return self::$weight_table;
@@ -65,7 +65,7 @@ class WeightTable{
   //protected
           public $reel1,$reel2,$reel3;
   public $symbol_weight_reel1,$symbol_weight_reel2,$symbol_weight_reel3;
-  function weight_table_filling(){
+  public function total_weight_table_filling(){
     //the symbol weight on reelN
     $this->symbol_weight_reel1[Symbol::$pyramid] = 4;
     $this->symbol_weight_reel1[Symbol::$bitcoin] = 5;
@@ -93,19 +93,112 @@ class WeightTable{
     //total: 64 for every reel
     
     $this->reel1 = new Reel('reel1');
-    $this->reel1->reel_line = $this->get_symbols_reel_line($this->symbol_weight_reel1);
+    //$this->reel1->reel_line = $this->get_symbols_reel_line($this->symbol_weight_reel1);
     $this->reel2 = new Reel('reel2');
-    $this->reel2->reel_line = $this->get_symbols_reel_line($this->symbol_weight_reel2);
+    //$this->reel2->reel_line = $this->get_symbols_reel_line($this->symbol_weight_reel2);
     $this->reel3 = new Reel('reel3');
-    $this->reel3->reel_line = $this->get_symbols_reel_line($this->symbol_weight_reel3);
+    //$this->reel3->reel_line = $this->get_symbols_reel_line($this->symbol_weight_reel3);
+    $this->weight_table_filling();
     /*
     $this->reel1_line = $this->get_symbols_reel_line($this->reel1);
     $this->reel2_line = $this->get_symbols_reel_line($this->reel2);
     $this->reel3_line = $this->get_symbols_reel_line($this->reel3);
     */
   }
+  
+  public function weight_table_filling(){
+    //for reel1 
+    $this->reel1->filling_by_given_symbol_specifin_number_of_cells(Symbol::$bitcoin, 3);
+    $this->reel1->filling_by_given_symbol_specifin_number_of_cells(Symbol::$blank, 2);
+    $this->reel1->filling_by_given_symbol_specifin_number_of_cells(Symbol::$anonymous, 3);
+    $this->reel1->filling_by_given_symbol_specifin_number_of_cells(Symbol::$blank, 2);
+
+    $this->reel1->filling_by_given_symbol_specifin_number_of_cells(Symbol::$onion, 3);
+    $this->reel1->filling_by_given_symbol_specifin_number_of_cells(Symbol::$blank, 2);
+    $this->reel1->filling_by_given_symbol_specifin_number_of_cells(Symbol::$anarchy, 4);
+    $this->reel1->filling_by_given_symbol_specifin_number_of_cells(Symbol::$blank, 2);
+    
+    $this->reel1->filling_by_given_symbol_specifin_number_of_cells(Symbol::$peace, 4);
+    $this->reel1->filling_by_given_symbol_specifin_number_of_cells(Symbol::$blank, 5);
+    $this->reel1->filling_by_given_symbol_specifin_number_of_cells(Symbol::$pyramid, 4);
+    $this->reel1->filling_by_given_symbol_specifin_number_of_cells(Symbol::$blank, 5);
+    
+    $this->reel1->filling_by_given_symbol_specifin_number_of_cells(Symbol::$bitcoin, 2);
+    $this->reel1->filling_by_given_symbol_specifin_number_of_cells(Symbol::$blank, 2);
+    $this->reel1->filling_by_given_symbol_specifin_number_of_cells(Symbol::$anonymous, 3);
+    $this->reel1->filling_by_given_symbol_specifin_number_of_cells(Symbol::$blank, 2);
+    
+    $this->reel1->filling_by_given_symbol_specifin_number_of_cells(Symbol::$onion, 3);
+    $this->reel1->filling_by_given_symbol_specifin_number_of_cells(Symbol::$blank, 2);
+    $this->reel1->filling_by_given_symbol_specifin_number_of_cells(Symbol::$anarchy, 3);
+    $this->reel1->filling_by_given_symbol_specifin_number_of_cells(Symbol::$blank, 2);
+    
+    $this->reel1->filling_by_given_symbol_specifin_number_of_cells(Symbol::$peace, 4);
+    $this->reel1->filling_by_given_symbol_specifin_number_of_cells(Symbol::$blank, 2);
+    
+    //for reel2
+    $this->reel2->filling_by_given_symbol_specifin_number_of_cells(Symbol::$bitcoin, 2);
+    $this->reel2->filling_by_given_symbol_specifin_number_of_cells(Symbol::$blank, 3);
+    $this->reel2->filling_by_given_symbol_specifin_number_of_cells(Symbol::$anonymous, 2);
+    $this->reel2->filling_by_given_symbol_specifin_number_of_cells(Symbol::$blank, 3);
+
+    $this->reel2->filling_by_given_symbol_specifin_number_of_cells(Symbol::$onion, 3);
+    $this->reel2->filling_by_given_symbol_specifin_number_of_cells(Symbol::$blank, 3);
+    $this->reel2->filling_by_given_symbol_specifin_number_of_cells(Symbol::$anarchy, 3);
+    $this->reel2->filling_by_given_symbol_specifin_number_of_cells(Symbol::$blank, 3);
+    
+    $this->reel2->filling_by_given_symbol_specifin_number_of_cells(Symbol::$peace, 3);
+    $this->reel2->filling_by_given_symbol_specifin_number_of_cells(Symbol::$blank, 5);
+    $this->reel2->filling_by_given_symbol_specifin_number_of_cells(Symbol::$pyramid, 3);
+    $this->reel2->filling_by_given_symbol_specifin_number_of_cells(Symbol::$blank, 5);
+    
+    $this->reel2->filling_by_given_symbol_specifin_number_of_cells(Symbol::$bitcoin, 2);
+    $this->reel2->filling_by_given_symbol_specifin_number_of_cells(Symbol::$blank, 3);
+    $this->reel2->filling_by_given_symbol_specifin_number_of_cells(Symbol::$anonymous, 2);
+    $this->reel2->filling_by_given_symbol_specifin_number_of_cells(Symbol::$blank, 3);
+    
+    $this->reel2->filling_by_given_symbol_specifin_number_of_cells(Symbol::$onion, 2);
+    $this->reel2->filling_by_given_symbol_specifin_number_of_cells(Symbol::$blank, 3);
+    $this->reel2->filling_by_given_symbol_specifin_number_of_cells(Symbol::$anarchy, 2);
+    $this->reel2->filling_by_given_symbol_specifin_number_of_cells(Symbol::$blank, 3);
+    
+    $this->reel2->filling_by_given_symbol_specifin_number_of_cells(Symbol::$peace, 3);
+    $this->reel2->filling_by_given_symbol_specifin_number_of_cells(Symbol::$blank, 3);
+    
+    //for reel3
+    $this->reel3->filling_by_given_symbol_specifin_number_of_cells(Symbol::$bitcoin, 1);
+    $this->reel3->filling_by_given_symbol_specifin_number_of_cells(Symbol::$blank, 3);
+    $this->reel3->filling_by_given_symbol_specifin_number_of_cells(Symbol::$anonymous, 2);
+    $this->reel3->filling_by_given_symbol_specifin_number_of_cells(Symbol::$blank, 3);
+
+    $this->reel3->filling_by_given_symbol_specifin_number_of_cells(Symbol::$onion, 2);
+    $this->reel3->filling_by_given_symbol_specifin_number_of_cells(Symbol::$blank, 3);
+    $this->reel3->filling_by_given_symbol_specifin_number_of_cells(Symbol::$anarchy, 3);
+    $this->reel3->filling_by_given_symbol_specifin_number_of_cells(Symbol::$blank, 3);
+    
+    $this->reel3->filling_by_given_symbol_specifin_number_of_cells(Symbol::$peace, 3);
+    $this->reel3->filling_by_given_symbol_specifin_number_of_cells(Symbol::$blank, 8);
+    $this->reel3->filling_by_given_symbol_specifin_number_of_cells(Symbol::$pyramid, 1);
+    $this->reel3->filling_by_given_symbol_specifin_number_of_cells(Symbol::$blank, 7);
+    
+    $this->reel3->filling_by_given_symbol_specifin_number_of_cells(Symbol::$bitcoin, 1);
+    $this->reel3->filling_by_given_symbol_specifin_number_of_cells(Symbol::$blank, 3);
+    $this->reel3->filling_by_given_symbol_specifin_number_of_cells(Symbol::$anonymous, 1);
+    $this->reel3->filling_by_given_symbol_specifin_number_of_cells(Symbol::$blank, 3);
+    
+    $this->reel3->filling_by_given_symbol_specifin_number_of_cells(Symbol::$onion, 2);
+    $this->reel3->filling_by_given_symbol_specifin_number_of_cells(Symbol::$blank, 3);
+    $this->reel3->filling_by_given_symbol_specifin_number_of_cells(Symbol::$anarchy, 3);
+    $this->reel3->filling_by_given_symbol_specifin_number_of_cells(Symbol::$blank, 3);
+    
+    $this->reel3->filling_by_given_symbol_specifin_number_of_cells(Symbol::$peace, 3);
+    $this->reel3->filling_by_given_symbol_specifin_number_of_cells(Symbol::$blank, 3);
+    
+    
+  }
+
   //$this->reel1
-  //return the filled line (array) that consists of 64 symbols considering the weight table
+  //return the filled line (array) that consists of 64 symbols with considering the weight table
   function get_symbols_reel_line($reel){
     //weight_arr == reel line
     $weight_arr = array(64);
@@ -137,7 +230,7 @@ echo ' ';
 function show_generated_total_weight_table() {
   echo 'generated the number  of appearances table';
   $w1 = WeightTable::get_instance();
-  echo '<table border=1px>';
+  echo '<table border="1px" style="border-collapse: collapse;">';
   echo '<tr>';
     
     echo '<td>';
@@ -179,8 +272,6 @@ function show_generated_total_weight_table() {
     $number_of_symbol[$i][Symbol::$blank] = 0;
   }
   for($reel_num = 0; $reel_num < 3; $reel_num++){
-    
-    
     echo '<tr>';
     for ($i = 0; $i < 64; $i++){
       if ($reel_num == 0){
@@ -192,62 +283,35 @@ function show_generated_total_weight_table() {
       if ($reel_num == 2){
         $cur_sym = $w1->reel3->get_new_randomly_choosed_symbol();
       }
-
-      if (Symbol::$pyramid == $cur_sym){
-        $number_of_symbol[$reel_num][Symbol::$pyramid]++;
-      }
-      if (Symbol::$bitcoin == $cur_sym){
-        $number_of_symbol[$reel_num][Symbol::$bitcoin]++;
-      }
-      if (Symbol::$anonymous == $cur_sym){
-        $number_of_symbol[$reel_num][Symbol::$anonymous]++;
-      }
-      if (Symbol::$onion == $cur_sym){
-        $number_of_symbol[$reel_num][Symbol::$onion]++;
-      }
-      if (Symbol::$anarchy == $cur_sym){
-        $number_of_symbol[$reel_num][Symbol::$anarchy]++;
-      }
-      if (Symbol::$peace == $cur_sym){
-        $number_of_symbol[$reel_num][Symbol::$peace]++;
-      }
-      if (Symbol::$blank == $cur_sym){
-        $number_of_symbol[$reel_num][Symbol::$blank]++;
+      foreach ($number_of_symbol[$reel_num] as $key => $value) {
+        //e.g.: if (Symbol::$pyramid == $cur_sym)
+        if ($key == $cur_sym){
+          //e.g.: $number_of_symbol[$reel_num][Symbol::$bitcoin]++;
+          $number_of_symbol[$reel_num][$key]++;
+        }
       }
     }
     echo '<td>';
     echo 'reel #'.$reel_num;
     echo '</td>';
-    echo '<td>';
-    echo $number_of_symbol[$reel_num][Symbol::$pyramid];
-    echo '</td>';
-    echo '<td>';
-    echo $number_of_symbol[$reel_num][Symbol::$bitcoin];
-    echo '</td>';
-    echo '<td>';
-    echo $number_of_symbol[$reel_num][Symbol::$anonymous];
-    echo '</td>';
-    echo '<td>';
-    echo $number_of_symbol[$reel_num][Symbol::$onion];
-    echo '</td>';
-    echo '<td>';
-    echo $number_of_symbol[$reel_num][Symbol::$anarchy];
-    echo '</td>';
-    echo '<td>';
-    echo $number_of_symbol[$reel_num][Symbol::$peace];
-    echo '</td>';
-    echo '<td>';
-    echo $number_of_symbol[$reel_num][Symbol::$blank];
-    echo '</td>';
-    echo '<td>';
+    
     $sum = 0;
     foreach ($number_of_symbol[$reel_num] as $key => $value) {
+      //count total weight
       $sum += $value;
+      echo '<td>'.$value;
+      echo '</td>';
+      /*
+      *the same as e.g.:
+      *echo '<td>';
+      *echo $number_of_symbol[$reel_num][Symbol::$onion];
+      *echo '</td>';
+      * 
+      */
     }
-    
+    echo '<td>';
     echo $sum;
     echo '</td>';
-    
     echo '</tr>';
   }
   //dump_it($number_of_symbol);
@@ -273,10 +337,12 @@ function possible_combinations(){
   $number_of_win_lines['bitcoin_1'] = 0;
   $number_of_win_lines['lose'] = 0;
   $N = 262144;
-  echo '<br /><table border=1px>';
+  //$N = 600000;
+  echo '<br /><table border="1px" style="border-collapse: collapse;">';
   for($i = 0; $i < $N; $i++){
     $new_payline = $slot->get_new_payline();
     $result = $paytable->paylines_matching_with_wins($new_payline);
+    //unset($new_payline);
     switch ($result){
       case 'pyramid_3': 
         $number_of_win_lines[Symbol::$pyramid]++;
@@ -310,7 +376,7 @@ function possible_combinations(){
         break;
     }
   }
-  echo 'Table of amount of wins for 262144 stops (the most combinations (excepts bitcoin_2 - any 2 are bitcoins, bitcoin_1 - any 1 is bitcoin and lose) for 3 symbols )';
+  echo 'Table of amount of wins for '.$N.' stops (the most combinations (excepts bitcoin_2 - any 2 are bitcoins, bitcoin_1 - any 1 is bitcoin and lose) for 3 symbols )';
   echo '<tr>';
   echo '<td>';
   echo 'win combination';
@@ -318,14 +384,55 @@ function possible_combinations(){
   echo '<td>';
   echo 'amount of appear';
   echo '</td>';
+  echo '<td>';
+  echo 'probability of appear';
+  echo '</td>';
+  echo '<td>';
+  echo 'money ( probability * payoff = )';
+  echo '</td>';
+  echo '<td>';
+  echo 'money return (to player)';
+  echo '</td>';
   echo '</tr>';
+  $total_sum = 0;
+  $total_probability_of_apear = 0;
   foreach ($number_of_win_lines as $key => $value) {
-    echo '<tr><td>'.$key;
-    echo '</td>';
-    echo '<td>';
-    echo $value; //$number_of_win_lines[$key];
-    echo '</td></tr>';
-  }  
+    echo '<tr>';
+    echo '<td>'.$key.'</td>';
+    echo '<td>'.$value.'</td>'; //$number_of_win_lines[$key];
+    echo '<td>'.$value/$N.'</td>';
+    $paytable = Paytable::get_instance();
+    //get payoff for given combination name (key_...)
+    if ($key == 'bitcoin_2' || $key == 'bitcoin_1'){
+      $total_probability_of_apear += $value/$N;
+      $payoff = $paytable->payoff_value_by_name($key);
+    }
+    elseif ($key == 'lose'){
+      $payoff = 0;
+    }
+    elseif ($key == 'blank'){
+      $payoff = 0;
+    }
+    else{
+      $total_probability_of_apear += $value/$N;
+      $payoff = $paytable->payoff_value_by_name($key.'_3');
+    }
+    $res = $value/$N * $payoff;
+    if ($res > 0)
+      $total_sum += $res;
+    //echo '<td>'.$value.' * '.$payoff.' = '.$res.'</td>';
+    echo '<td>'.$value/$N.' * '.$payoff.' = </td>';
+    echo '<td>'.$res.'</td>';
+    echo '</tr>';
+   
+  }
+  echo '<tr>';
+  echo '<td>TOTAL:</td>';
+  echo '<td>'.$N.'</td>';
+  echo '<td>'.$total_probability_of_apear.'</td>';
+  echo '<td>sum=</td>';
+  echo '<td>'.$total_sum.'</td>';
+  echo '</tr>';
   echo '</table>';
 }
 
