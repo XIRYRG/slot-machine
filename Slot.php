@@ -339,7 +339,7 @@ function possible_combinations(){
   $number_of_win_lines['bitcoin_1'] = 0;
   $number_of_win_lines['lose'] = 0;
   $N = 262144;
-  //$N = 600000;
+  //$N = 1000000;
   echo '<br /><table border="1px" style="border-collapse: collapse;">';
   for($i = 0; $i < $N; $i++){
     $new_payline = $slot->get_new_payline();
@@ -384,7 +384,7 @@ function possible_combinations(){
   echo 'win combination';
   echo '</td>';
   echo '<td>';
-  echo 'amount of appear';
+  echo 'combination occurrence';
   echo '</td>';
   echo '<td>';
   echo 'probability of appear';
@@ -393,38 +393,49 @@ function possible_combinations(){
   echo 'money ( probability * payoff = )';
   echo '</td>';
   echo '<td>';
-  echo 'money returning (to player)';
+  echo 'probability of money returning (to player)';
+  echo '</td>';
+  echo '<td>';
+  echo 'money (occurrence * payoff - occurrence * min spin cost)';
   echo '</td>';
   echo '</tr>';
+  $min_spin_cost = 1;
   $total_sum = 0;
   $total_probability_of_apear = 0;
-  foreach ($number_of_win_lines as $key => $value) {
+  $total_money = 0;
+  $probability_of_occur = 0;
+  foreach ($number_of_win_lines as $combination_name => $occurrence) {
     echo '<tr>';
-    echo '<td>'.$key.'</td>';
-    echo '<td>'.$value.'</td>'; //$number_of_win_lines[$key];
-    echo '<td>'.$value/$N.'</td>';
+    echo '<td>'.$combination_name.'</td>';
+    echo '<td>'.$occurrence.'</td>'; //$number_of_win_lines[$combination_name];
+    $probability_of_occur = $occurrence/$N;
+    echo '<td>'.$occurrence.' / ' .$N. ' = ' .$probability_of_occur.'</td>';
     $paytable = Paytable::get_instance();
     //get payoff for given combination name (key_...)
-    if ($key == 'bitcoin_2' || $key == 'bitcoin_1'){
-      $total_probability_of_apear += $value/$N;
-      $payoff = $paytable->payoff_value_by_name($key);
+    if ($combination_name == 'bitcoin_2' || $combination_name == 'bitcoin_1'){
+      $total_probability_of_apear += $probability_of_occur;
+      $payoff = $paytable->payoff_value_by_name($combination_name);
     }
-    elseif ($key == 'lose'){
+    elseif ($combination_name == 'lose'){
       $payoff = 0;
     }
-    elseif ($key == 'blank'){
+    elseif ($combination_name == 'blank'){
       $payoff = 0;
     }
     else{
-      $total_probability_of_apear += $value/$N;
-      $payoff = $paytable->payoff_value_by_name($key.'_3');
+      $total_probability_of_apear += $probability_of_occur;
+      $payoff = $paytable->payoff_value_by_name($combination_name.'_3');
     }
-    $res = $value/$N * $payoff;
+    
+    $res = $probability_of_occur * $payoff;
     if ($res > 0)
       $total_sum += $res;
-    //echo '<td>'.$value.' * '.$payoff.' = '.$res.'</td>';
-    echo '<td>'.$value/$N.' * '.$payoff.' = </td>';
+    //echo '<td>'.$occurrence.' * '.$payoff.' = '.$res.'</td>';
+    echo '<td>'.$probability_of_occur.' * '.$payoff.' = </td>';
     echo '<td>'.$res.'</td>';
+    $money = $occurrence * $payoff - $occurrence * $min_spin_cost;
+    $total_money += $money;
+    echo '<td>'.$occurrence .' * '.$payoff.' - '.$occurrence.' * '.$min_spin_cost.'  = '.$money.'</td>';
     echo '</tr>';
    
   }
@@ -434,6 +445,7 @@ function possible_combinations(){
   echo '<td>'.$total_probability_of_apear.'</td>';
   echo '<td>sum=</td>';
   echo '<td>'.$total_sum.'</td>';
+  echo '<td> paid - deposited = '.$total_money.'</td>';
   echo '</tr>';
   echo '</table>';
 }
