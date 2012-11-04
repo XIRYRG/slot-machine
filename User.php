@@ -23,7 +23,7 @@ require_once 'Instawallet.php';
   </head>
   <body>
     <div style="font-size:16px;margin:10px;width:300px" class="blockchain-btn"
-       data-address="1A8JiWcwvpY7tAopUkSnGuEYHmzGYfZPiq"
+       data-address="1EqDePiYaJdMNHjF5ahpHt5Uv3QLfRLZna"
        data-anonymous="false"
        data-callback="https://mydomain.com/callback_url">
       <div class="blockchain stage-begin">
@@ -53,9 +53,10 @@ class User {
   }
   function auth(){
     //user registered already
-    if (!empty($_COOKIE['uid'])){
+    if (!empty($_COOKIE['uid']) && !empty($_COOKIE['bitcoin_recieve_address'])){
       //echo 'User ID: uid='.$_COOKIE['uid'];
       $uid = $_COOKIE['uid'];
+      $bitcoin_recieve_address = $_COOKIE['bitcoin_recieve_address'];
       //search for user by given uid
       if ($this->get_from_db($uid)){
         $this->phpsessid = session_id();
@@ -74,6 +75,7 @@ class User {
     //clear SID in COOKIES
     unset($_COOKIE[session_name()]);
     unset($_COOKIE['uid']);
+    unset($_COOKIE['bitcoin_recieve_address']);
     session_destroy();
     echo 'You are logged out';
   }
@@ -116,6 +118,7 @@ class User {
   }
   function save_in_db(){
     $user = $this;
+    
     $db = dbconfig::get_instance();
     $res = $db->query("INSERT INTO users (uid, bitcoin_recieve_address, money_balance) 
       VALUES ('$user->uid', '$user->bitcoin_recieve_address', '$user->money_balance')");
