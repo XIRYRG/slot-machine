@@ -11,6 +11,7 @@
  * @author vadim24816
  */
 
+require_once 'bitcoin/bitcoin.inc';
 //Cookies should be enabled
 class AppConfig{
   /*

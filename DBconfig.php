@@ -1,11 +1,11 @@
 <?php
-require_once 'appconfig.php';
-require_once 'dumpit.php';
-class dbconfig {
+require_once 'Appconfig.php';
+require_once 'Dumpit.php';
+class DBconfig {
   public static function get_instance(){
     if (is_null(self::$db)){
-      self::$db = new dbconfig();
-      self::$db->mysql_pconnect();
+      self::$db = new DBconfig();
+      self::$db->mysql_connect();
       return self::$db;
     }
     return self::$db;
@@ -33,10 +33,12 @@ class dbconfig {
 
   }
     function mysql_connect(){
+      $this->config_filling();
       $link = mysql_connect($this->hostname, $this->username, $this->pass);
       // try to connect for MySQL
       if (!$link) {
         echo "MySQL connection error";
+        echo mysql_error();
         exit;
       }
       else{
@@ -46,7 +48,6 @@ class dbconfig {
     }
     function mysql_pconnect(){
       $this->config_filling();
-      //echo 'mysql_pconnect';
       $link = mysql_pconnect($this->hostname, $this->username, $this->pass);
       // try to connect for MySQL
       if (!$link) {
@@ -58,10 +59,6 @@ class dbconfig {
         //echo 'Connected...';
       }
       mysql_select_db($this->dbname);
-      //$result = mysql_query("SELECT * FROM users", $link);
-      //while($row = mysql_fetch_array($result)){
-        //dump_it($row);
-      //}
     }
     function query($query_string){
       mysql_real_escape_string($query_string);
@@ -70,14 +67,8 @@ class dbconfig {
     }
     function mysql_fetch_array($query_string){
       $q = $this->query($query_string);
-      /*
-      while($row = mysql_fetch_array($q)){
-        echo 'row=';
-        dump_it($row);
-      }*/
       return mysql_fetch_array($q);
     }
 }
-$db = dbconfig::get_instance();
-$db->mysql_pconnect();
+$db = DBconfig::get_instance();
 ?>
