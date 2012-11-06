@@ -48,16 +48,16 @@ require_once 'MyBitcoinClient.php';
 
 <?php
 class User {
-  public $uid, $phpsessid, $wallet;//, $bitcoin_recieve_address, $money_balance;
+  public $uid, $phpsessid, $wallet, $bitcoin_recieve_address;//, $bitcoin_recieve_address, $money_balance;
   function __construct() {
     //$this->auth();
   }
   function auth(){
     //user registered already
-    if (!empty($_COOKIE['uid']) && !empty($_COOKIE['bitcoin_recieve_address'])){
-      // todo: class Cookie. escaping all the data was recieved
+    if (!empty($_COOKIE['uid'])){// || !empty($_COOKIE['bitcoin_recieve_address'])){
       $uid = htmlentities($_COOKIE['uid']);
-      $bitcoin_recieve_address = htmlentities($_COOKIE['bitcoin_recieve_address']);
+      $this->uid = $uid;
+      //$bitcoin_recieve_address = htmlentities($_COOKIE['bitcoin_recieve_address']);
       //search for user by given uid
       if ($this->get_from_db($uid)){
         $this->phpsessid = session_id();
@@ -83,18 +83,22 @@ class User {
   function reg(){
     $this->phpsessid = session_id();
     //$this->uid = sha1(session_id());
+    
+    //if this uid has had in DB already it generates new uid
     $this->uid = sha1(uniqid(""));
+    echo $this->uid;
+    while($this->get_from_db($this->uid)){
+      $this->uid = sha1(uniqid(""));
+    }
+    echo '<br>';
+    echo $this->uid;
     $this->money_balance = 0;
     SetCookie("uid",  $this->uid, AppConfig::now_plus_one_year(), '/');
+    SetCookie("bitcoin_recieve_address",  $this->bitcoin_recieve_address, AppConfig::now_plus_one_year(), '/');
     
     //create the new wallet for new user
-    //$w1 = new Instawallet();
-    //$w1->new_wallet_curl();
-    //dump_it($w1);
     $bitcoin_client_instance = MyBitcoinClient::get_instance();
-    $this->bitcoin_recieve_address = $w1->address;
-    $this->wallet = $w1;
-    
+    $this->bitcoin_recieve_address = $bitcoin_client_instance->getaccountaddress($this->uid);
     $this->save_in_db();
   }
   //get user record from db
@@ -128,9 +132,9 @@ class User {
 $u1 = new User();
 $u1->auth();
 
-$u1_serialized = serialize($u1);
-SetCookie("uid",$u1->uid, $NOW_PLUS_ONE_YEAR, '/');
-dump_it(unserialize($u1_serialized));
+//$u1_serialized = serialize($u1);
+//SetCookie("uid",$u1->uid, $NOW_PLUS_ONE_YEAR, '/');
+//dump_it(unserialize($u1_serialized));
 //$u1->logout();
 
 ?>
