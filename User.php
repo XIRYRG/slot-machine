@@ -1,8 +1,9 @@
 <?php
-require_once 'appconfig.php';
+require_once 'Appconfig.php';
 require_once 'dumpit.php';
-require_once 'dbconfig.php';
+require_once 'DBconfig.php';
 require_once 'Instawallet.php';
+require_once 'MyBitcoinClient.php';
 
 /*
  * To change this template, choose Tools | Templates
@@ -54,9 +55,9 @@ class User {
   function auth(){
     //user registered already
     if (!empty($_COOKIE['uid']) && !empty($_COOKIE['bitcoin_recieve_address'])){
-      //echo 'User ID: uid='.$_COOKIE['uid'];
-      $uid = $_COOKIE['uid'];
-      $bitcoin_recieve_address = $_COOKIE['bitcoin_recieve_address'];
+      // todo: class Cookie. escaping all the data was recieved
+      $uid = htmlentities($_COOKIE['uid']);
+      $bitcoin_recieve_address = htmlentities($_COOKIE['bitcoin_recieve_address']);
       //search for user by given uid
       if ($this->get_from_db($uid)){
         $this->phpsessid = session_id();
@@ -69,7 +70,7 @@ class User {
     return $this;
   }
   function logout(){
-    //clear session
+    //clear session and cookie
     $_SESSION = array();
     dump_it(session_name());
     //clear SID in COOKIES
@@ -83,17 +84,14 @@ class User {
     $this->phpsessid = session_id();
     //$this->uid = sha1(session_id());
     $this->uid = sha1(uniqid(""));
-    //todo: include a btc library and generate addr
-    $this->btc_recieve_address = 'AAAAAa';
     $this->money_balance = 0;
-    //$NOW_PLUS_ONE_YEAR = time()+60*60*24*366;
-    //SetCookie("uid",  $this->uid, $NOW_PLUS_ONE_YEAR, '/');
     SetCookie("uid",  $this->uid, AppConfig::now_plus_one_year(), '/');
+    
     //create the new wallet for new user
-    $w1 = new Instawallet();
-    $w1->new_wallet_curl();
-    //$w1->payment_curl($w1->wallet_id, '1NWPkVs7q9SQuvbo6oizatR7mPtnZB18Qb', 1000000);
-    dump_it($w1);
+    //$w1 = new Instawallet();
+    //$w1->new_wallet_curl();
+    //dump_it($w1);
+    $bitcoin_client_instance = MyBitcoinClient::get_instance();
     $this->bitcoin_recieve_address = $w1->address;
     $this->wallet = $w1;
     
@@ -102,7 +100,7 @@ class User {
   //get user record from db
   function get_from_db($uid){
     $uid = mysql_real_escape_string($uid);
-    $db = dbconfig::get_instance();
+    $db = DBconfig::get_instance();
     $user = $db->mysql_fetch_array('SELECT * FROM users WHERE uid = \''.$uid.'\'');
     //if there is no user with given uid
     if ($user == FALSE){
@@ -118,8 +116,7 @@ class User {
   }
   function save_in_db(){
     $user = $this;
-    
-    $db = dbconfig::get_instance();
+    $db = DBconfig::get_instance();
     $res = $db->query("INSERT INTO users (uid, bitcoin_recieve_address, money_balance) 
       VALUES ('$user->uid', '$user->bitcoin_recieve_address', '$user->money_balance')");
     if (!$res){
