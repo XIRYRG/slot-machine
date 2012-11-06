@@ -48,7 +48,21 @@ unset($bitcoin);
  * 
  */
 //echo $acc = $bitcoin->getbalance('myWallet');
+/*
+$scheme = 'http';
+$username = 'bitcoinrpc';
+$password = 'bBvvbjBP4fSHAnLF38PeHcExtYrCgCRR6j9EL68yEPj';
+$mybit = new BitcoinClient($scheme, $username, $password);
+echo '<br>';
+echo $mybit->can_connect();
+echo '<br>';
 
-$mybit = MyBitcoinClient::get_instance();
-dump_it($mybit);
+//$mybit = MyBitcoinClient::get_instance();
+echo $mybit->getaccountaddress('ggfgf12345');
+echo $mybit->getaccountaddress('ggfgf12345');
+ * 
+ */
+
+
+//dump_it($mybit);
 ?>
