@@ -5,6 +5,8 @@
  *
  * @author vadim24816
  */
+require_once 'Appconfig.php';
+
 class Cookie {
   public static function get_instance(){
     if (is_null(self::$cookie)){

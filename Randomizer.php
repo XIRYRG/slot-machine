@@ -10,6 +10,8 @@
  *
  * @author vadim24816
  */
+require_once 'Appconfig.php';
+
 class Randomizer {
   //make it singletone
   protected static $randomizer;

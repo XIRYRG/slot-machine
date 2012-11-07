@@ -1,5 +1,4 @@
 <?php
-require_once 'Dumpit.php';
 require_once 'Appconfig.php';
 /*require_once 'jsonRPCClient.php';
 $bitcoin = new jsonRPCClient('http://bitcoinrpc:bBvvbjBP4fSHAnLF38PeHcExtYrCgCRR6j9EL68yEPj@127.0.0.1:8332/');
