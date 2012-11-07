@@ -1,6 +1,6 @@
 <?php
 require_once 'Appconfig.php';
-require_once 'Dumpit.php';
+
 class DBconfig {
   public static function get_instance(){
     if (is_null(self::$db)){

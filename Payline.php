@@ -10,9 +10,7 @@
  *
  * @author vadim24816
  */
-require_once 'dumpit.php';
-require_once 'appconfig.php';
-require_once 'Symbol.php';
+require_once 'Appconfig.php';
 
 //array of 3 symbols like: ['pyramid', 'bitcoin', 'anonymous']
 class Payline {

@@ -11,9 +11,8 @@
  * @author vadim24816
  */
 
-require_once 'dumpit.php';
-require_once 'Randomizer.php';
-require_once 'Symbol.php';
+require_once 'Appconfig.php';
+
 class Reel {
   public $reel_line = array(),$name;
   public function __construct($name) {

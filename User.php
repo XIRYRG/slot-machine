@@ -1,9 +1,6 @@
 <?php
 require_once 'Appconfig.php';
-require_once 'dumpit.php';
-require_once 'DBconfig.php';
-require_once 'Instawallet.php';
-require_once 'MyBitcoinClient.php';
+
 
 /*
  * To change this template, choose Tools | Templates
@@ -17,42 +14,13 @@ require_once 'MyBitcoinClient.php';
  */
 ?>
      
-<html>
-  <head>
-    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.0/jquery.min.js"></script>
-    <script type="text/javascript" src="https://blockchain.info//Resources/wallet/pay-now-button.js"></script>
-  </head>
-  <body>
-    <div style="font-size:16px;margin:10px;width:300px" class="blockchain-btn"
-       data-address="1EqDePiYaJdMNHjF5ahpHt5Uv3QLfRLZna"
-       data-anonymous="false"
-       data-callback="https://mydomain.com/callback_url">
-      <div class="blockchain stage-begin">
-          <img src="http://static.blockchain.info//Resources/buttons/pay_now_64.png">
-      </div>
-      <div class="blockchain stage-loading" style="text-align:center">
-          <img src="http://static.blockchain.info//Resources/loading-large.gif">
-      </div>
-      <div class="blockchain stage-ready">
-          Please send payment to bitcoin address <b>[[address]]</b>
-      </div>
-      <div class="blockchain stage-paid">
-          Payment Received [[value]] BTC. Thank You.
-      </div>
-      <div class="blockchain stage-error">
-          <font color="red">[[error]]</font>
-      </div>
-    </div>
-  </body>
-</html>
-
 <?php
 class User {
-  public $uid, $phpsessid, $wallet, $bitcoin_recieve_address;//, $bitcoin_recieve_address, $money_balance;
-  function __construct() {
-    //$this->auth();
+  public $uid, $phpsessid, $wallet, $bitcoin_recieve_address, $money_balance;//, $bitcoin_recieve_address, $money_balance;
+  public function __construct() {
+    $this->auth();
   }
-  function auth(){
+  public function auth(){
     //user registered already
     if (!empty($_COOKIE['uid'])){// || !empty($_COOKIE['bitcoin_recieve_address'])){
       $uid = htmlentities($_COOKIE['uid']);
@@ -69,7 +37,7 @@ class User {
     }
     return $this;
   }
-  function logout(){
+  public function logout(){
     //clear session and cookie
     $_SESSION = array();
     dump_it(session_name());
@@ -80,7 +48,7 @@ class User {
     session_destroy();
     echo 'You are logged out';
   }
-  function reg(){
+  public function reg(){
     $this->phpsessid = session_id();
     //$this->uid = sha1(session_id());
     
@@ -118,6 +86,10 @@ class User {
       return TRUE;
     }
   }
+  //for updating money balance
+  function update_from_db($uid){
+    $this->get_from_db($uid);
+  }
   function save_in_db(){
     $user = $this;
     $db = DBconfig::get_instance();
@@ -128,9 +100,6 @@ class User {
     }
   }
 }
-
-$u1 = new User();
-$u1->auth();
 
 //$u1_serialized = serialize($u1);
 //SetCookie("uid",$u1->uid, $NOW_PLUS_ONE_YEAR, '/');

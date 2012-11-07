@@ -11,12 +11,7 @@
  * @author vadim24816
  */
 
-require_once 'appconfig.php';
-require_once 'dumpit.php';
-require_once 'Symbol.php';
-require_once 'Reel.php';
-require_once 'Payline.php';
-require_once 'Paytable.php';
+require_once 'Appconfig.php';
 
 class Slot {
   //make it singletone

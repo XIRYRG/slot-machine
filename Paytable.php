@@ -11,9 +11,7 @@
  * @author vadim24816
  */
 
-require_once 'Payline.php';
-require_once 'Symbol.php';
-require_once 'appconfig.php';
+require_once 'Appconfig.php';
 
 class Paytable {
   //make it singletone

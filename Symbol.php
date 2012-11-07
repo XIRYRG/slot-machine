@@ -10,6 +10,8 @@
  *
  * @author vadim24816
  */
+require_once 'Appconfig.php';
+
 class Symbol {
   public $name;
   public $pic;
