@@ -348,7 +348,7 @@ $u1 = new User();
       //todo: updateBetAndBalance
       this.updateBetAndBalance = function(){
         var slot = this;
-        ('div#slots-balance').text(slot.currentUserBalance);
+        $('div#slots-balance').text(slot.currentUserBalance);
         $('div#slots-bet').text(slot.currentBet);
       }
       //load user balance from server
