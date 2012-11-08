@@ -21,6 +21,7 @@ class User {
     $this->auth();
   }
   public function auth(){
+    //todo: no DB connection exception!
     //user registered already
     if (!empty($_COOKIE['uid'])){// || !empty($_COOKIE['bitcoin_recieve_address'])){
       $uid = htmlentities($_COOKIE['uid']);
@@ -76,6 +77,7 @@ class User {
     $user = $db->mysql_fetch_array('SELECT * FROM users WHERE uid = \''.$uid.'\'');
     //if there is no user with given uid
     if ($user == FALSE){
+      echo 'user == false';
       return FALSE;
     }
     //the user is found

@@ -11,6 +11,7 @@ $bitcoin = new jsonRPCClient('http://bitcoinrpc:bBvvbjBP4fSHAnLF38PeHcExtYrCgCRR
  * 
  */
 
+//todo: no connection exception
 class MyBitcoinClient{
   public static function get_instance(){
     if (is_null(self::$bitcoin)){
@@ -34,6 +35,9 @@ class MyBitcoinClient{
     $this->certificate_path = "";
     $this->debug_level = 0;
     self::$bitcoin = new BitcoinClient($this->scheme, $this->username, $this->password, $this->address, $this->port, $this->certificate_path, $this->debug_level);
+  }
+  public function query(){
+    
   }
 }
 
