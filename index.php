@@ -246,15 +246,29 @@ $u1 = new User();
       //todo: get config for slot (on client side) via Ajax Or use default config described here
       //default slot config
       this.uid = uid;
-      this.currentBet = 0;
-      this.currentUserBalance = 0;
-      this.lastBet = 0;
-      this.lastUserBalance = 0;
+      this.currentBet = new Number(0);
+      this.currentUserBalance = new Number(0);
+      this.lastBet = new Number(0);
+      //this.balanceBeforeLastBet = this.currentUserBalance
+      this.lastUserBalance = new Number(0);
       this.symbolsPerReel = 64;
-      //this.maxBet = 100;
       this.syncWithServer = function(){
+        var slot = this;
+        user = null;
+        $.post("AjaxRequestsProcessing.php", { slot: "sync" }, function(slotValues){
+          user = eval( "("+slotValues+")");
+          slot.uid = user.uid;
+          slot.currentUserBalance = new Number(user.money_balance);
+          slot.updateBalanceAndBet();
+          //todo: try/catch and in case bad request 
+          //slot.currentUserBalance = user_balance;
+          //slotValues
+        });
+        console.log(user);
+        
+        
         //todo: sync all values 
-        this.getUserBalanceFromServer();
+        //this.getUserBalanceFromServer();
       }
       this.lastShowedSymbols = {
         reel1: {symbol1: 'pyramid', symbol2: 'anonymous', symbol3: 'anarchy'},
@@ -280,8 +294,8 @@ $u1 = new User();
       //make 1 spin
       this.spin = function(){
         //no bet
-        if (this.currentBet <= 0 || (this.currentUserBalance - this.currentBet < 0)){
-          console.log('[Current bet = 0 or greater than your balance!]');
+        if (this.currentBet <= 0){
+          console.log('[Current bet = 0]');
           return;
         }
         //already started
@@ -298,21 +312,20 @@ $u1 = new User();
         
         var slot = this;
         //bet was 
-        slot.currentUserBalance -= slot.currentBet;
-        slot.updateBetAndBalance();
         slot.lastBet = slot.currentBet;
         slot.currentBet = 0;
-        slot.getCurrentBet();
-        //$('button#slots-spin').on('click', function(){
-        
+        slot.updateBalanceAndBet();
+        slot.animateSlot();
+        //todo: save the last showed symbols
+      }
+      this.animateSlot = function(){
+        var slot = this;
         $('div.slots-line').each(function(){
           $(this).css({marginTop: -(slot.symbolsPerReel-3)*125 + 'px'});
         });
         $('div#slots-reel1 > div.slots-line').animate({marginTop: 0}, slot.rotationTime.reel1);
         $('div#slots-reel2 > div.slots-line').animate({marginTop: 0}, slot.rotationTime.reel2);
         $('div#slots-reel3 > div.slots-line').animate({marginTop: 0}, slot.rotationTime.reel3);
-      //});
-        //todo: save the last showed symbols
       }
       //fills lines of symbols
       this.linesFilling = function(){
@@ -325,53 +338,78 @@ $u1 = new User();
         $(this).css({marginTop: -(slot.symbolsPerReel-3)*125 + 'px'});
       });
       }
-      //just update balance on the page
-      this.updateUserBalance = function(){
-        $('div#slots-balance').text(this.currentUserBalance);
-      }
-      this.updateCurrentBet = function(){
-        
-      }
-      //todo: incBet()
       this.incBetTo = function(val){
+        val = Number(val);
+        val = Math.round(val*100) / 100;
+        console.log(val);
         //can't inc bet
-        if (this.currentUserBalance <= 0){
+        if (this.currentUserBalance - val < 0){
+          console.log("[can't inc bet]");
           return false;
         }
+        
         this.currentUserBalance -= val;
         this.currentBet += val;
+        this.currentUserBalance = Math.round(this.currentUserBalance * 100) / 100;
+        this.currentBet = Math.round(this.currentBet * 100) / 100;
+        this.updateBalanceAndBet();
       }
       this.decBetTo = function(val){
+        val = Number(val);
+        val = Math.round(val*100) / 100;
+        if (this.currentBet - val < 0){
+          return false;
+        }
         this.currentUserBalance += val;
         this.currentBet -= val;
+        this.currentUserBalance = Math.round(this.currentUserBalance * 100) / 100;
+        this.currentBet = Math.round(this.currentBet * 100) / 100;
+        this.updateBalanceAndBet();
       }
-      //todo: updateBetAndBalance
-      this.updateBetAndBalance = function(){
+      this.setBetTo = function(val){
+        //not number
+        if (typeof(val) != 'number'){
+          return 0;
+        }
+        val = Number(val);
+        val = Math.round(val*100) / 100;
+        //val should be >= 0
+        if (val < 0){
+          return 0;
+        }
+        //val should be < currentUserBalance
+        if (this.currentUserBalance + this.currentBet - val < 0){
+          console.log("[Not enough money. Max bet had been made.]");
+          val = this.getMaxBet();
+          //return 0;
+        }
+        //bet back to balance
+        this.currentUserBalance = this.currentBet + this.currentUserBalance;
+        //make bet
+        this.currentBet = val;
+        //balance minus bet
+        this.currentUserBalance -= this.currentBet;
+        //round all
+        this.currentUserBalance = Math.round(this.currentUserBalance * 100) / 100;
+        this.currentBet = Math.round(this.currentBet * 100) / 100;
+        this.updateBalanceAndBet();
+      }
+      //retfresh values on page
+      this.updateBalanceAndBet = function(){
         var slot = this;
         $('div#slots-balance').text(slot.currentUserBalance);
         $('div#slots-bet').text(slot.currentBet);
       }
-      //load user balance from server
-      this.getUserBalanceFromServer = function(){
-        var slot = this;
-        $.post("test.php", function(user_balance){
-          console.log("User balance loaded: " + user_balance);
-          //todo: try/catch and in case bad request 
-          $('div#slots-balance').text(user_balance);
-          slot.currentUserBalance = user_balance;
-        });
-      }
-      //return user's current bet and fill current bet field
-      this.getCurrentBet = function(){
-        var slot = this;
-        $('div#slots-bet').text(slot.currentBet);
-        return slot.currentBet;
-      }
+
       //return max bet and fill current bet field
       this.getMaxBet = function(){
         var slot = this;
-        $('div#slots-bet').text(slot.currentUserBalance);
-        return slot.currentUserBalance;
+        return slot.currentUserBalance + slot.currentBet;
+      }
+      this.makeMaxBet = function(){
+        var slot = this;
+        var maxBet = slot.getMaxBet();
+        this.setBetTo(maxBet);
       }
       this.getLastBet = function(){
         if (this.lastBet == 0){
@@ -379,14 +417,12 @@ $u1 = new User();
           return 0;
         }
         var slot = this;
-        $('div#slots-bet').text(slot.lastBet);
-        slot.currentBet = slot.lastBet;
         return slot.lastBet;
       }
       
     }
     $(document).ready(function(){
-      uid = '<?php echo $u1->uid; ?>';
+      var uid = '<?php echo $u1->uid; ?>';
       slot = new Slot(uid);
       slot.linesFilling();
       slot.syncWithServer();
@@ -395,30 +431,42 @@ $u1 = new User();
       });
       
       $('button#slots-maxbet').on('click', function(){
-        slot.currentBet = slot.getMaxBet();
+        slot.makeMaxBet();
       });
       $('button#slots-lastbet').on('click', function(){
-        slot.currentBet = slot.getLastBet();
+        slot.setBetTo(slot.getLastBet());
       });
-      
+      //plus
       $('button.slots-plus').on('click', function(){
         console.log(this.id);
         var buttonPlusId = this.id;
         switch(buttonPlusId){
           case 'slots-plus001':
-            slot.currentUserBalance -= 0.01;
-            slot.currentBet += 0.01;
+            slot.incBetTo(0.01);
             break;
           case 'slots-plus01':
-            slot.currentUserBalance -= 0.1;
-            slot.currentBet += 0.1;
+            slot.incBetTo(0.1);
             break;
           case 'slots-plus1':
-            slot.currentUserBalance -= 1;
-            slot.currentBet += 1;
+            slot.incBetTo(1);
             break;
         }
-        slot.getCurrentBet();
+      });
+      //minus
+      $('button.slots-minus').on('click', function(){
+        console.log(this.id);
+        var buttonPlusId = this.id;
+        switch(buttonPlusId){
+          case 'slots-minus001':
+            slot.decBetTo(0.01);
+            break;
+          case 'slots-minus01':
+            slot.decBetTo(0.1);
+            break;
+          case 'slots-minus1':
+            slot.decBetTo(1);
+            break;
+        }
       });
       
     });
