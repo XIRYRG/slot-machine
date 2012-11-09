@@ -16,12 +16,17 @@ require_once 'Appconfig.php';
 class Slot {
   //make it singletone
   protected static $slot;
+  public static $user;
   private function __construct(){}
   private function __clone(){} 
   private function __wakeup(){} 
   public static function get_instance(){
     if (is_null(self::$slot)){
       self::$slot = new Slot();
+      //if user not exist it will create him!
+      self::$user = new User();
+      self::$user->auth();
+      //if (self::$user->get_from_db())
       //self::$slot->slot_filling();
       return self::$slot;
     }
@@ -30,7 +35,56 @@ class Slot {
   
   //last payline == current payline, reels is array of reel objects
   protected $last_payline;//, $reels = array(3);
-  public $reel1,$reel2,$reel3;
+  public $reel1,$reel2,$reel3, $reels;
+  public $currentBet, $currentUserBalance, $lastBet, $state;
+
+  //validate client's bet 
+  public function isValidBet($betFromClient){
+    //not a number
+    if (!is_numeric($betFromClient)){
+      return false;
+    }
+    self::$user->update_from_db();
+    if ($betFromClient > 0 && $betFromClient <= self::$user->money_balance){
+      return true;
+    }
+    else {
+      return false;
+    }
+  }
+
+  //make spin
+  public function spin($betFromClient){
+    if (!$this->isValidBet($betFromClient)){
+      echo '[Bet <= 0 or Bet not number.]';
+      return false;
+    }
+    
+    //already started
+    if ($this->state == 'started'){
+      //console.log('[Slot started already. Wait while it have stoped! ]');
+      echo '[Slot started already. Wait while it have stoped! ]';
+      return false;
+    }
+    //slot started
+    //$this->getStateStarted();
+    $this->state = 'started';
+    //$this->getStateStop();
+    $this->state = 'stop';
+    $this->currentBet = $betFromClient;
+    //bet was 
+    $this->lastBet = $this->currentBet;
+    self::$user->money_balance -= $this->currentBet;
+    $this->currentBet = 0;
+    $new_payline = $this->get_new_payline();
+    $this->last_payline = $new_payline;
+    $s = self::$user->save_in_db();
+    self::$user->update_from_db();
+    return json_encode($new_payline);
+    
+    //todo: save the last showed symbols
+  }
+
   //return new randomly generated payline
   public function get_new_payline(){
     for ($i = 0; $i < 3; $i++){
@@ -87,12 +141,17 @@ class WeightTable{
     $this->symbol_weight_reel3[Symbol::$blank] = 42;
     //total: 64 for every reel
     
+    $slot = Slot::get_instance();
     $this->reel1 = new Reel('reel1');
     $this->reel1->reel_line = $this->get_symbols_reel_line($this->symbol_weight_reel1);
     $this->reel2 = new Reel('reel2');
     $this->reel2->reel_line = $this->get_symbols_reel_line($this->symbol_weight_reel2);
     $this->reel3 = new Reel('reel3');
     $this->reel3->reel_line = $this->get_symbols_reel_line($this->symbol_weight_reel3);
+    
+    $slot->reels[0] = $this->reel1;
+    $slot->reels[1] = $this->reel2;
+    $slot->reels[2] = $this->reel3;
     
     //weight table filling, not total weight
     $this->weight_table_filling();
@@ -318,9 +377,6 @@ function show_generated_total_weight_table() {
 function possible_combinations(){
   $w1 = WeightTable::get_instance();
   $slot = Slot::get_instance();
-  $slot->reels[0] = $w1->reel1;
-  $slot->reels[1] = $w1->reel2;
-  $slot->reels[2] = $w1->reel3;
   $paytable = Paytable::get_instance();
   
   $number_of_win_lines[Symbol::$pyramid] = 0;
@@ -445,7 +501,7 @@ function possible_combinations(){
   echo '</table>';
 }
 
-
-show_generated_total_weight_table();
-possible_combinations();
+//show tables
+//show_generated_total_weight_table();
+//possible_combinations();
 ?>

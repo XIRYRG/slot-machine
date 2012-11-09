@@ -2,6 +2,7 @@
 require_once 'Appconfig.php';
 //auth/register new user
 $u1 = new User();
+$u1->auth();
 
 ?>
 <!doctype html>
@@ -249,9 +250,14 @@ $u1 = new User();
       this.currentBet = new Number(0);
       this.currentUserBalance = new Number(0);
       this.lastBet = new Number(0);
-      //this.balanceBeforeLastBet = this.currentUserBalance
-      this.lastUserBalance = new Number(0);
       this.symbolsPerReel = 64;
+      this.sendToServerThatSpinPressed = function(){
+        var slot = this;
+        $.post("AjaxRequestsProcessing.php", { slot: "spinPressed", currentBet: slot.currentBet }, function(spinResponse){
+          console.log(spinResponse);
+          //todo: try/catch and in case bad request 
+        });
+      }
       this.syncWithServer = function(){
         var slot = this;
         user = null;
@@ -295,7 +301,7 @@ $u1 = new User();
       this.spin = function(){
         //no bet
         if (this.currentBet <= 0){
-          console.log('[Current bet = 0]');
+          console.log('[Current bet = 0. Not worth the trouble]');
           return;
         }
         //already started
@@ -303,6 +309,7 @@ $u1 = new User();
           console.log('[Slot started already. Wait while it have stoped! ]');
           return;
         }
+        this.sendToServerThatSpinPressed();
         //todo: syncronize the client slot values with the server slot values
         //slot started
         this.getStateStarted();
@@ -317,6 +324,9 @@ $u1 = new User();
         slot.updateBalanceAndBet();
         slot.animateSlot();
         //todo: save the last showed symbols
+        
+        //sync the result with the server
+        slot.syncWithServer();
       }
       this.animateSlot = function(){
         var slot = this;
