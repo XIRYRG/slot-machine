@@ -63,6 +63,9 @@ class DBconfig {
     function query($query_string){
       mysql_real_escape_string($query_string);
       $result = mysql_query($query_string);
+      if (!$result){
+        echo mysql_error();
+      }
       return $result;
     }
     function mysql_fetch_array($query_string){
