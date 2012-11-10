@@ -248,10 +248,14 @@ $u1->auth();
       //default slot config
       this.uid = uid;
       this.currentBet = new Number(0);
+      this.lastPayline = '';
       this.currentPayline = '';
       this.currentUserBalance = new Number(0);
       this.lastBet = new Number(0);
       this.symbolsPerReel = 64;
+      this.arrayOfSymbolsId = new Array();
+      this.onceFilledLine = false;
+      this.onceStarted = false;
       this.sendToServerThatSpinPressed = function(){
         var slot = this;
         $.post("AjaxRequestsProcessing.php", { slot: "spinPressed", currentBet: slot.currentBet })//, function(paylineReturnedByServerSpin){
@@ -261,6 +265,7 @@ $u1->auth();
           console.log(paylineReturnedByServerSpin);
           slot.currentPayline = eval( "("+paylineReturnedByServerSpin+")");
           slot.fillPayLine();
+          slot.rememberLastShowedSymbols();
         })
         .error(function(){
           console.log('Client error. Error in ajax spin request, no response');
@@ -295,9 +300,10 @@ $u1->auth();
         //this.getUserBalanceFromServer();
       }
       this.lastShowedSymbols = {
-        reel1: {symbol1: 'pyramid', symbol2: 'bitcoin', symbol3: 'anonymous'},
-        reel2: {symbol1: 'onion', symbol2: 'anarchy', symbol3: 'peace'},
-        reel3: {symbol1: 'blank', symbol2: 'pyramid', symbol3: 'blank'}
+        //fill it by blank symbols
+        reel1: {top: 6, center: 6, bottom: 6},
+        reel2: {top: 6, center: 6, bottom: 6},
+        reel3: {top: 6, center: 6, bottom: 6}
       }
       
       this.getValidSymbolByName = function(symbol){
@@ -327,48 +333,83 @@ $u1->auth();
         }
         */
         $('div.slots-line').append('<div class="slots-symbol'+ symbol +'"></div>');
-        //$('div#slots-reel'+reelNum+' > div.slots-line').append('<div class="slots-symbol'+ symbol +'"></div>');
-        /*
-        switch(line){
-          case 'top':
-            $('div#slots-reel'+reelNum+' > div.slots-line').append('<div class="slots-symbol'+ slot.getValidSymbolByName(symbol) +'"></div>');
-            break;
-          case '':
-            $('div#slots-reel'+reelNum+' > div.slots-line').append('<div class="slots-symbol'+ slot.getValidSymbolByName(symbol) +'"></div>');
-            break;
-          case 'top':
-            $('div#slots-reel'+reelNum+' > div.slots-line').append('<div class="slots-symbol'+ slot.getValidSymbolByName(symbol) +'"></div>');
-            break;
-        }
-        */
+      }
+      //
+      this.restoreLastShowedSymbols = function(){
+        var slot = this;
+        $('div#slots-reel1 > div.slots-line > div.oldpayline').prev().attr('class', 'slots-symbol'+slot.lastShowedSymbols.reel1.top);
+        $('div#slots-reel1 > div.slots-line > div.oldpayline').attr('class', 'slots-symbol'+slot.lastShowedSymbols.reel1.center+' oldpayline');
+        $('div#slots-reel1 > div.slots-line > div.oldpayline').next().attr('class', 'slots-symbol'+slot.lastShowedSymbols.reel1.bottom);
         
+        $('div#slots-reel2 > div.slots-line > div.oldpayline').prev().attr('class', 'slots-symbol'+slot.lastShowedSymbols.reel2.top);
+        $('div#slots-reel2 > div.slots-line > div.oldpayline').attr('class', 'slots-symbol'+slot.lastShowedSymbols.reel2.center+' oldpayline');
+        $('div#slots-reel2 > div.slots-line > div.oldpayline').next().attr('class', 'slots-symbol'+slot.lastShowedSymbols.reel2.bottom);
         
+        $('div#slots-reel3 > div.slots-line > div.oldpayline').prev().attr('class', 'slots-symbol'+slot.lastShowedSymbols.reel3.top);
+        $('div#slots-reel3 > div.slots-line > div.oldpayline').attr('class', 'slots-symbol'+slot.lastShowedSymbols.reel3.center+' oldpayline');
+        $('div#slots-reel3 > div.slots-line > div.oldpayline').next().attr('class', 'slots-symbol'+slot.lastShowedSymbols.reel3.bottom);
+      }
+      
+      //remember who you are
+      this.rememberLastShowedSymbols = function(){
+        var slot = this;
+        slot.lastShowedSymbols.reel1.top = slot.arrayOfSymbolsId[0][0];
+        slot.lastShowedSymbols.reel1.center = slot.getValidSymbolByName(slot.currentPayline.sym1);
+        slot.lastShowedSymbols.reel1.bottom = slot.arrayOfSymbolsId[0][2];
+        
+        slot.lastShowedSymbols.reel2.top = slot.arrayOfSymbolsId[1][0];
+        slot.lastShowedSymbols.reel2.center = slot.getValidSymbolByName(slot.currentPayline.sym2);
+        slot.lastShowedSymbols.reel2.bottom = slot.arrayOfSymbolsId[1][2];
+        
+        slot.lastShowedSymbols.reel3.top = slot.arrayOfSymbolsId[2][0];
+        slot.lastShowedSymbols.reel3.center = slot.getValidSymbolByName(slot.currentPayline.sym3);
+        slot.lastShowedSymbols.reel3.bottom = slot.arrayOfSymbolsId[2][2];
+      }
+      this.regenerateLinesRandomly = function(){
         
       }
       //fills lines of symbols
       this.linesFilling = function(){
         var slot = this;
+        
         //linesFilling should be called after filling slot.currentPayline (== Ajax-request for spin| == on the server spin completed)
         /*if (!slot.currentPayline){
           return false;
         }*/
         //slot.fillLine(slot.symbols['pyramid']);
-        //$('div.slots-line').css({marginTop: -(slot.symbolsPerReel-3)*125 + 'px'});       
-      $('div.slots-line').each(function(){
-        for (var i = 0; i < slot.symbolsPerReel; i++) {
-          var id = Math.round(Math.random()*(slot.totalSymbolsNumber-1));
-          $(this).append('<div class="slots-symbol'+ id +'"></div>');
-        }
-        $(this).css({marginTop: -(slot.symbolsPerReel-3)*125 + 'px'});
-      });
-      
-      $('div#slots-reel1 > div.slots-line :nth-child(2)').attr('class');
-      $('div#slots-reel2 > div.slots-line :nth-child(2)').attr('class');
-      $('div#slots-reel3 > div.slots-line :nth-child(2)').attr('class');
-      
-      //add classes oldpayline and payline
-      $('div.slots-line :nth-child(2)').addClass('payline');
-      $('div.slots-line :nth-child(63)').addClass('oldpayline');
+        //$('div.slots-line').css({marginTop: -(slot.symbolsPerReel-3)*125 + 'px'});  
+        //slot.arrayOfSymbolsId = new Array();
+        var reelNumber = 0;
+        $('div.slots-line').each(function(){
+          slot.arrayOfSymbolsId[reelNumber] = new Array();
+          for (var i = 0; i < slot.symbolsPerReel; i++) {
+            var id = Math.round(Math.random()*(slot.totalSymbolsNumber-1));
+            //reelLineSymbols keep wrong id for payline!
+            //because payline gets new id after request to server
+            slot.arrayOfSymbolsId[reelNumber][i] = id;
+            if (!slot.onceFilledLine){
+              $(this).append('<div class="slots-symbol'+ id +'"></div>');
+            }
+            else{
+              //toooooo slow. todo: rerandom only prev and next lines
+              $(this).children('div :nth-child('+(i+1)+')').attr('class','slots-symbol'+ id);
+            }
+          }
+          
+          $(this).css({marginTop: -(slot.symbolsPerReel-3)*125 + 'px'});
+          reelNumber++;
+        });
+        
+/*
+        $('div#slots-reel1 > div.slots-line :nth-child(2)').attr('class');
+        $('div#slots-reel2 > div.slots-line :nth-child(2)').attr('class');
+        $('div#slots-reel3 > div.slots-line :nth-child(2)').attr('class');
+*/
+        //add classes oldpayline and payline
+        $('div.slots-line :nth-child(2)').addClass('payline');
+        $('div.slots-line :nth-child(63)').addClass('oldpayline');
+        slot.onceFilledLine = true;
+        //slot.rememberLastShowedSymbols();
       }
       this.rotationTime = {
         //rotation time for every reel in ms
@@ -390,22 +431,32 @@ $u1->auth();
       }
       //make 1 spin
       this.spin = function(){
+        var slot = this;
         //no bet
-        if (this.currentBet <= 0){
+        if (slot.currentBet <= 0){
           console.log('[Current bet = 0. Not worth the trouble]');
           return;
         }
         //already started
-        if (this.state == 'started'){
+        if (slot.state == 'started'){
           console.log('[Slot started already. Wait while it have stoped! ]');
           return;
         }
-        this.sendToServerThatSpinPressed();
+        
+        //restore last showed symbols if there is last show exists
+        
+        slot.linesFilling();
+        if (slot.onceStarted){
+            slot.restoreLastShowedSymbols();
+        }
+        //save last payline
+        slot.lastPayline = this.currentPayline;
+        slot.sendToServerThatSpinPressed();
         //todo: syncronize the client slot values with the server slot values
         //slot started
         
         
-        var slot = this;
+        
         slot.getStateStarted();
         setTimeout('slot.getStateStop()', slot.maxSpinTime);
         //bet was 
@@ -413,12 +464,12 @@ $u1->auth();
         slot.currentBet = 0;
         slot.updateBalanceAndBet();
         slot.animateSlot();
-        //todo: save the last showed symbols
         
         //sync the result with the server
         setTimeout('slot.syncWithServer()', slot.maxSpinTime);
         //set last bet as current bet after spin
         setTimeout('slot.setBetTo(slot.getLastBet())', slot.maxSpinTime);
+        slot.onceStarted = true;
       }
       this.animateSlot = function(){
         var slot = this;
