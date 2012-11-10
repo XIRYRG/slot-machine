@@ -79,7 +79,7 @@ class User {
     //create the new wallet for new user
     $bitcoin_client_instance = MyBitcoinClient::get_instance();
     $this->bitcoin_recieve_address = $bitcoin_client_instance->getaccountaddress($this->uid);
-    $this->user_wallet = 'No yet';
+    $this->user_wallet = 'No_yet';
     $this->affiliateusername = 'Nobody';
     $this->save_in_db();
     

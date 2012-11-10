@@ -248,15 +248,33 @@ $u1->auth();
       //default slot config
       this.uid = uid;
       this.currentBet = new Number(0);
+      this.currentPayline = '';
       this.currentUserBalance = new Number(0);
       this.lastBet = new Number(0);
       this.symbolsPerReel = 64;
       this.sendToServerThatSpinPressed = function(){
         var slot = this;
-        $.post("AjaxRequestsProcessing.php", { slot: "spinPressed", currentBet: slot.currentBet }, function(spinResponse){
-          console.log(spinResponse);
+        $.post("AjaxRequestsProcessing.php", { slot: "spinPressed", currentBet: slot.currentBet })//, function(paylineReturnedByServerSpin){
           //todo: try/catch and in case bad request 
-        });
+        //})
+        .success(function(paylineReturnedByServerSpin) {
+          console.log(paylineReturnedByServerSpin);
+          slot.currentPayline = eval( "("+paylineReturnedByServerSpin+")");
+          slot.fillPayLine();
+        })
+        .error(function(){
+          console.log('Client error. Error in ajax spin request, no response');
+        })
+        ;
+      }
+      this.symbols = {
+        'pyramid': 0,
+        'bitcoin': 1,
+        'anonymous': 2,
+        'onion': 3,
+        'anarchy': 4,
+        'peace': 5,
+        'blank': 6
       }
       this.syncWithServer = function(){
         var slot = this;
@@ -277,16 +295,89 @@ $u1->auth();
         //this.getUserBalanceFromServer();
       }
       this.lastShowedSymbols = {
-        reel1: {symbol1: 'pyramid', symbol2: 'anonymous', symbol3: 'anarchy'},
-        reel1: {symbol1: 'pyramid', symbol2: 'anonymous', symbol3: 'anarchy'},
-        reel1: {symbol1: 'pyramid', symbol2: 'anonymous', symbol3: 'anarchy'}
+        reel1: {symbol1: 'pyramid', symbol2: 'bitcoin', symbol3: 'anonymous'},
+        reel2: {symbol1: 'onion', symbol2: 'anarchy', symbol3: 'peace'},
+        reel3: {symbol1: 'blank', symbol2: 'pyramid', symbol3: 'blank'}
+      }
+      
+      this.getValidSymbolByName = function(symbol){
+        if (typeof(symbol) == 'number' && symbol >= 0 && symbol <= 6){
+          return symbol;
+        }
+        if ( typeof(this.symbols[symbol]) == 'undefined'){
+          return false;
+        }
+        else{
+          return this.symbols[symbol];
+        }
+      }
+      //fill payline
+      this.fillPayLine = function(){
+        $('div#slots-reel1 > div.slots-line > div.payline').attr('class', 'slots-symbol'+slot.getValidSymbolByName(slot.currentPayline.sym1)+' payline');
+        $('div#slots-reel2 > div.slots-line > div.payline').attr('class', 'slots-symbol'+slot.getValidSymbolByName(slot.currentPayline.sym2)+' payline');
+        $('div#slots-reel3 > div.slots-line > div.payline').attr('class', 'slots-symbol'+slot.getValidSymbolByName(slot.currentPayline.sym3)+' payline');
+      }
+      
+      //fill line (top/center/bottom) in slot
+      this.fillLine = function(symbol){
+        var slot = this;
+        /*
+        if (!(typeof(reelNum) == 'number') || reelNum < 1 || reelNum > 3 ){
+          return false;
+        }
+        */
+        $('div.slots-line').append('<div class="slots-symbol'+ symbol +'"></div>');
+        //$('div#slots-reel'+reelNum+' > div.slots-line').append('<div class="slots-symbol'+ symbol +'"></div>');
+        /*
+        switch(line){
+          case 'top':
+            $('div#slots-reel'+reelNum+' > div.slots-line').append('<div class="slots-symbol'+ slot.getValidSymbolByName(symbol) +'"></div>');
+            break;
+          case '':
+            $('div#slots-reel'+reelNum+' > div.slots-line').append('<div class="slots-symbol'+ slot.getValidSymbolByName(symbol) +'"></div>');
+            break;
+          case 'top':
+            $('div#slots-reel'+reelNum+' > div.slots-line').append('<div class="slots-symbol'+ slot.getValidSymbolByName(symbol) +'"></div>');
+            break;
+        }
+        */
+        
+        
+        
+      }
+      //fills lines of symbols
+      this.linesFilling = function(){
+        var slot = this;
+        //linesFilling should be called after filling slot.currentPayline (== Ajax-request for spin| == on the server spin completed)
+        /*if (!slot.currentPayline){
+          return false;
+        }*/
+        //slot.fillLine(slot.symbols['pyramid']);
+        //$('div.slots-line').css({marginTop: -(slot.symbolsPerReel-3)*125 + 'px'});       
+      $('div.slots-line').each(function(){
+        for (var i = 0; i < slot.symbolsPerReel; i++) {
+          var id = Math.round(Math.random()*(slot.totalSymbolsNumber-1));
+          $(this).append('<div class="slots-symbol'+ id +'"></div>');
+        }
+        $(this).css({marginTop: -(slot.symbolsPerReel-3)*125 + 'px'});
+      });
+      
+      $('div#slots-reel1 > div.slots-line :nth-child(2)').attr('class');
+      $('div#slots-reel2 > div.slots-line :nth-child(2)').attr('class');
+      $('div#slots-reel3 > div.slots-line :nth-child(2)').attr('class');
+      
+      //add classes oldpayline and payline
+      $('div.slots-line :nth-child(2)').addClass('payline');
+      $('div.slots-line :nth-child(63)').addClass('oldpayline');
       }
       this.rotationTime = {
         //rotation time for every reel in ms
-        reel1: 1000,
-        reel2: 2000,
-        reel3: 3000
+        reel1: 5000,
+        reel2: 5500,
+        reel3: 6000
       };
+      //max spin time is the max time of every reel rotates
+      this.maxSpinTime = Math.max(this.rotationTime.reel1,this.rotationTime.reel2,this.rotationTime.reel3);
       this.totalSymbolsNumber = 7;
       this.state = 'stop';
       //make slot state 'stop'
@@ -312,12 +403,11 @@ $u1->auth();
         this.sendToServerThatSpinPressed();
         //todo: syncronize the client slot values with the server slot values
         //slot started
-        this.getStateStarted();
-        //setTimeout('this.getStateStop()', 3000);
-        //todo: timeout(reels(maxTime))
-        this.getStateStop();
+        
         
         var slot = this;
+        slot.getStateStarted();
+        setTimeout('slot.getStateStop()', slot.maxSpinTime);
         //bet was 
         slot.lastBet = slot.currentBet;
         slot.currentBet = 0;
@@ -326,7 +416,9 @@ $u1->auth();
         //todo: save the last showed symbols
         
         //sync the result with the server
-        slot.syncWithServer();
+        setTimeout('slot.syncWithServer()', slot.maxSpinTime);
+        //set last bet as current bet after spin
+        setTimeout('slot.setBetTo(slot.getLastBet())', slot.maxSpinTime);
       }
       this.animateSlot = function(){
         var slot = this;
@@ -337,17 +429,7 @@ $u1->auth();
         $('div#slots-reel2 > div.slots-line').animate({marginTop: 0}, slot.rotationTime.reel2);
         $('div#slots-reel3 > div.slots-line').animate({marginTop: 0}, slot.rotationTime.reel3);
       }
-      //fills lines of symbols
-      this.linesFilling = function(){
-        var slot = this;
-        $('div.slots-line').each(function(){
-        for (var i = 0; i < slot.symbolsPerReel; i++) {
-          var id = Math.round(Math.random()*(slot.totalSymbolsNumber-1));
-          $(this).append('<div class="slots-symbol'+ id +'"></div>');
-        }  
-        $(this).css({marginTop: -(slot.symbolsPerReel-3)*125 + 'px'});
-      });
-      }
+
       this.incBetTo = function(val){
         val = Number(val);
         val = Math.round(val*100) / 100;

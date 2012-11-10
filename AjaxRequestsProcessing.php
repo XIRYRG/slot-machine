@@ -13,13 +13,19 @@
 
 require_once 'Appconfig.php';
 
-
+if (!empty($_POST['slot'])){
+  $post_request = $_POST['slot'];
+}
+else {
+  exit('No slot option in POST array');
+}
 
 //$get_request = $_GET['slot'];
 $user = new User();
 $user->auth();
 $slot = Slot::get_instance();
-$post_request = $_POST['slot'];
+//$post_request = '';
+
 switch ($post_request) {
   case 'sync':
     //todo: make auth!!
