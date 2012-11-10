@@ -208,8 +208,10 @@ class Paytable {
   }
   
 }
-
+/*
 $paytable1 = Paytable::get_instance();
 $payline1 = new Payline(Symbol::$blank, Symbol::$any, Symbol::$any);
 $paytable1->paylines_matching_with_wins($payline1);
+ * 
+ */
 ?>

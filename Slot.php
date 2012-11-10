@@ -77,6 +77,11 @@ class Slot {
     self::$user->money_balance -= $this->currentBet;
     $this->currentBet = 0;
     $new_payline = $this->get_new_payline();
+    $paytable = Paytable::get_instance();
+    $win_combination_name = $paytable->paylines_matching_with_wins($new_payline);
+    //user gets money he won
+    $won_money = $paytable->payoff_value($new_payline) * $betFromClient;
+    self::$user->money_balance += $won_money;
     $this->last_payline = $new_payline;
     $s = self::$user->save_in_db();
     self::$user->update_from_db();

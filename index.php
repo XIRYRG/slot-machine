@@ -250,6 +250,7 @@ $u1->auth();
       this.currentBet = new Number(0);
       this.lastPayline = '';
       this.currentPayline = '';
+      this.autoplay = false;
       this.currentUserBalance = new Number(0);
       this.lastBet = new Number(0);
       this.symbolsPerReel = 64;
@@ -287,7 +288,7 @@ $u1->auth();
         $.post("AjaxRequestsProcessing.php", { slot: "sync" }, function(slotValues){
           user = eval( "("+slotValues+")");
           slot.uid = user.uid;
-          slot.currentUserBalance = new Number(user.money_balance);
+          slot.currentUserBalance = new Number(user.money_balance - slot.currentBet);
           slot.updateBalanceAndBet();
           //todo: try/catch and in case bad request 
           //slot.currentUserBalance = user_balance;
@@ -334,7 +335,7 @@ $u1->auth();
         */
         $('div.slots-line').append('<div class="slots-symbol'+ symbol +'"></div>');
       }
-      //
+      //There is no spoon
       this.restoreLastShowedSymbols = function(){
         var slot = this;
         $('div#slots-reel1 > div.slots-line > div.oldpayline').prev().attr('class', 'slots-symbol'+slot.lastShowedSymbols.reel1.top);
@@ -408,7 +409,11 @@ $u1->auth();
         //add classes oldpayline and payline
         $('div.slots-line :nth-child(2)').addClass('payline');
         $('div.slots-line :nth-child(63)').addClass('oldpayline');
-        slot.onceFilledLine = true;
+        if (!slot.onceFilledLine){
+          slot.onceFilledLine = true;
+          slot.rememberLastShowedSymbols();
+        }
+        //slot.onceFilledLine = true;
         //slot.rememberLastShowedSymbols();
       }
       this.rotationTime = {
@@ -540,6 +545,8 @@ $u1->auth();
       //retfresh values on page
       this.updateBalanceAndBet = function(){
         var slot = this;
+        this.currentUserBalance = Math.round(this.currentUserBalance * 100) / 100;
+        this.currentBet = Math.round(this.currentBet * 100) / 100;
         $('div#slots-balance').text(slot.currentUserBalance);
         $('div#slots-bet').text(slot.currentBet);
       }
@@ -575,6 +582,26 @@ $u1->auth();
       
       $('button#slots-maxbet').on('click', function(){
         slot.makeMaxBet();
+      });
+      $('button#slots-autoplay').on('click', function(){
+        clearInterval(slot.intervalID);
+        if (!slot.autoplay){
+          slot.autoplay = true;
+          slot.spin();
+          //setInterval(function(){
+          slot.intervalID = setInterval(function(){
+            console.log('autoplay');
+            if (slot.autoplay){
+              slot.spin();
+            }
+            //else
+            //  slot.autoplay = false;
+          }
+          , slot.maxSpinTime+500)
+        }
+        else{
+          slot.autoplay = false;
+        }
       });
       $('button#slots-lastbet').on('click', function(){
         slot.setBetTo(slot.getLastBet());
