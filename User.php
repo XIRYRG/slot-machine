@@ -31,9 +31,10 @@ class User {
     return self::$user;
   }
   */
-  public $uid, $phpsessid, $user_wallet, $bitcoin_recieve_address, $money_balance, $affiliateusername;//, $bitcoin_recieve_address, $money_balance;
+  public $uid, $phpsessid, $user_wallet, $bitcoin_recieve_address, $money_balance, $affiliateusername, $remote_user_address;//, $bitcoin_recieve_address, $money_balance;
   
   public function auth(){
+    //$_COOKIE['uid'] = '900b15b28c5dbdb15fb626dbde50861b14274384';
     //todo: no DB connection exception!
     //user registered already
     if (!empty($_COOKIE['uid'])){// || !empty($_COOKIE['bitcoin_recieve_address'])){
@@ -47,7 +48,8 @@ class User {
     }
     //user visits first time
     else {
-      $this->reg();
+      if (!$this->reg())
+        throw new Exception('Can\'t register new user');
     }
     return $this;
   }
@@ -63,6 +65,10 @@ class User {
     echo 'You are logged out';
   }
   public function reg(){
+    if (!empty($_SERVER['REMOTE_ADDR'])){
+      $remote_user_address = $_SERVER['REMOTE_ADDR'];
+    }
+    
     $this->phpsessid = session_id();
     //$this->uid = sha1(session_id());
     
@@ -81,11 +87,18 @@ class User {
     $this->bitcoin_recieve_address = $bitcoin_client_instance->getaccountaddress($this->uid);
     $this->user_wallet = 'No_yet';
     $this->affiliateusername = 'Nobody';
-    $this->save_in_db();
-    
-    SetCookie("uid",  $this->uid, AppConfig::now_plus_one_year(), '/');
-    //todo: set it when user have sent money to slot
-    SetCookie("user_wallet",  $this->user_wallet, AppConfig::now_plus_one_year(), '/');
+    $this->remote_user_address = $remote_user_address;
+    //e.g.:                  04:34:19 11.11.2012
+    $this->created_at = date('h:i:s d.m.Y');
+    if ($this->save_in_db()){
+      SetCookie("uid",  $this->uid, AppConfig::now_plus_one_year(), '/');
+      //todo: set it when user have sent money to slot
+      SetCookie("user_wallet",  $this->user_wallet, AppConfig::now_plus_one_year(), '/');
+      return true;
+    }
+    else {
+      return false;
+    }
   }
   //get user record from db
   function get_from_db($uid){
@@ -125,21 +138,25 @@ class User {
   }
   function save_in_db(){
     $db = DBconfig::get_instance();
-    //if not exist insert in DB
+    //if user not exist insert in DB
     if (!$this->is_user_exist($this->uid)){
-      $res = $db->query("INSERT INTO users (uid, bitcoin_recieve_address, user_wallet, money_balance, affiliateusername) 
-        VALUES ('$this->uid', '$this->bitcoin_recieve_address', '$this->user_wallet', '$this->money_balance', '$this->affiliateusername')");
+      $res = $db->query("INSERT INTO users (uid, bitcoin_recieve_address, user_wallet, money_balance, affiliateusername, created_at, remote_user_address) 
+        VALUES ('$this->uid', '$this->bitcoin_recieve_address', '$this->user_wallet', '$this->money_balance', '$this->affiliateusername', NOW(), '$this->remote_user_address')");//NOW() == '$this->created_at',
+      
     }
-    //else just update record
+    //if user exists already just update record
     else {
       $q = "UPDATE users SET 
         `bitcoin_recieve_address` = '$this->bitcoin_recieve_address',
         `user_wallet` = '$this->user_wallet',
         `money_balance` = '$this->money_balance',
-        `affiliateusername` = '$this->affiliateusername'
+        `affiliateusername` = '$this->affiliateusername',
+        `created_at` = '$this->created_at',
+        `remote_user_address` = '$this->remote_user_address'
         WHERE `uid` = '$this->uid'
       ";
       $res = $db->query($q);
+      return true;
     }
     
     if (!$res){
@@ -147,6 +164,7 @@ class User {
     }
     //update user after saving
     $this->get_from_db($this->uid);
+    return true;
   }
 }
 

@@ -241,7 +241,7 @@ $u1->auth();
       background: url(images/bsm-symbol-empty.png);
     } 
   </style>
-  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
   <script type="text/javascript">
     function Slot(uid){
       //todo: get config for slot (on client side) via Ajax Or use default config described here
@@ -263,6 +263,9 @@ $u1->auth();
           //todo: try/catch and in case bad request 
         //})
         .success(function(paylineReturnedByServerSpin) {
+          if (paylineReturnedByServerSpin == '[Bet <= 0 or Bet not number.]'){
+            return false;
+          }
           console.log(paylineReturnedByServerSpin);
           slot.currentPayline = eval( "("+paylineReturnedByServerSpin+")");
           slot.fillPayLine();
@@ -437,17 +440,16 @@ $u1->auth();
       //make 1 spin
       this.spin = function(){
         var slot = this;
-        //no bet
-        if (slot.currentBet <= 0){
-          console.log('[Current bet = 0. Not worth the trouble]');
-          return;
-        }
         //already started
         if (slot.state == 'started'){
           console.log('[Slot started already. Wait while it have stoped! ]');
           return;
         }
-        
+        //no bet
+        if (slot.currentBet <= 0){
+          console.log('[Current bet = 0. Not worth the trouble]');
+          return;
+        }
         //restore last showed symbols if there is last show exists
         
         slot.linesFilling();
@@ -471,9 +473,9 @@ $u1->auth();
         slot.animateSlot();
         
         //sync the result with the server
-        setTimeout('slot.syncWithServer()', slot.maxSpinTime);
+        setTimeout('slot.syncWithServer()', slot.maxSpinTime-200);
         //set last bet as current bet after spin
-        setTimeout('slot.setBetTo(slot.getLastBet())', slot.maxSpinTime);
+        setTimeout('slot.setBetTo(slot.getLastBet())', slot.maxSpinTime+200);
         slot.onceStarted = true;
       }
       this.animateSlot = function(){
@@ -591,13 +593,18 @@ $u1->auth();
           //setInterval(function(){
           slot.intervalID = setInterval(function(){
             console.log('autoplay');
+            if (slot.currentUserBalance + slot.currentBet <= 0){
+              slot.autoplay = false;
+            }
             if (slot.autoplay){
               slot.spin();
             }
-            //else
-            //  slot.autoplay = false;
+            else{
+              clearInterval(slot.intervalID);
+              slot.autoplay = false;
+            }
           }
-          , slot.maxSpinTime+500)
+          , 1000/*(slot.maxSpinTime+500)/2*/)
         }
         else{
           slot.autoplay = false;
@@ -663,7 +670,7 @@ $u1->auth();
     <div id="slots-body">
       <img id="slots-logo" src="images/bsm-logo.png" alt="SatoshiSlots.com">
       <img id="slots-paytable" src="images/bsm-paytable.png" alt="Paytable">
-      <div id="slots-address" class="slots-display"><?php echo $u1->bitcoin_recieve_address; ?></div>
+      <div id="slots-address" class="slots-display"> <?php echo $u1->bitcoin_recieve_address; ?> </div>
       <div id="slots-balance" class="slots-display">0<?php //echo $u1->money_balance; //todo: update without refresh!?></div>
       <div id="slots-bet" class="slots-display">0</div>
       <button id="slots-minus001" class="slots-button slots-minus"></button>
