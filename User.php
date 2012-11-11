@@ -34,7 +34,8 @@ class User {
   public $uid, $phpsessid, $user_wallet, $bitcoin_recieve_address, $money_balance, $affiliateusername, $remote_user_address;//, $bitcoin_recieve_address, $money_balance;
   
   public function auth(){
-    //$_COOKIE['uid'] = '900b15b28c5dbdb15fb626dbde50861b14274384';
+    //SetCookie("uid",  '900b15b28c5dbdb15fb626dbde50861b14274384', AppConfig::now_plus_one_year(), '/');
+    $_COOKIE['uid'] = '900b15b28c5dbdb15fb626dbde50861b14274384';
     //todo: no DB connection exception!
     //user registered already
     if (!empty($_COOKIE['uid'])){// || !empty($_COOKIE['bitcoin_recieve_address'])){
@@ -48,6 +49,15 @@ class User {
     }
     //user visits first time
     else {
+      /*
+      try{
+        $this->reg();
+      }
+      catch (BitcoinClientException $e) {
+        echo $e->getMessage();
+      }
+       * 
+       */
       if (!$this->reg())
         throw new Exception('Can\'t register new user');
     }
@@ -84,7 +94,16 @@ class User {
     
     //create the new wallet for new user
     $bitcoin_client_instance = MyBitcoinClient::get_instance();
-    $this->bitcoin_recieve_address = $bitcoin_client_instance->getaccountaddress($this->uid);
+    //no connection with bitcoin server
+    if (!$bitcoin_client_instance->can_connect()){
+      throw new BitcoinClientException("No connection with bitcoin server");
+    }
+    try{//to get bitcoin_recieve_address
+      $this->bitcoin_recieve_address = $bitcoin_client_instance->getaccountaddress($this->uid);
+    }
+    catch (BitcoinClientException $e) {
+      echo $e->getMessage();
+    }
     $this->user_wallet = 'No_yet';
     $this->affiliateusername = 'Nobody';
     $this->remote_user_address = $remote_user_address;

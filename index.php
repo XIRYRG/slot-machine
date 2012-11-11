@@ -422,8 +422,8 @@ $u1->auth();
       this.rotationTime = {
         //rotation time for every reel in ms
         reel1: 5000,
-        reel2: 5500,
-        reel3: 6000
+        reel2: 6000,
+        reel3: 7000
       };
       //max spin time is the max time of every reel rotates
       this.maxSpinTime = Math.max(this.rotationTime.reel1,this.rotationTime.reel2,this.rotationTime.reel3);
@@ -491,7 +491,7 @@ $u1->auth();
       this.incBetTo = function(val){
         val = Number(val);
         val = Math.round(val*100) / 100;
-        console.log(val);
+        //console.log(val);
         //can't inc bet
         if (this.currentUserBalance - val < 0){
           console.log("[can't inc bet]");
@@ -508,6 +508,7 @@ $u1->auth();
         val = Number(val);
         val = Math.round(val*100) / 100;
         if (this.currentBet - val < 0){
+          console.log("[can't dec bet]");
           return false;
         }
         this.currentUserBalance += val;

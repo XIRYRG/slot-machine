@@ -7,8 +7,6 @@ dump_it($cookie);*/
 //echo '123';
 
 try {
-  
-  
   //$m = MyBitcoinClient::get_instance();
   //echo $m->getbalance('900b15b28c5dbdb15fb626dbde50861b14274384');
   //dump_it($m->getaddressesbyaccount('myWallet'));
@@ -31,4 +29,8 @@ else{
 dump_it($u);
 
 */
+
+//show tables
+show_generated_total_weight_table();
+possible_combinations();
 ?>
