@@ -14,7 +14,7 @@
 //must be first!
 ini_set('session.gc_maxlifetime', AppConfig::now_plus_one_year());
 ini_set('session.cookie_lifetime', AppConfig::now_plus_one_year());
-ini_set('session.save_path', $_SERVER['DOCUMENT_ROOT'] .'/slot-machine1/sessions');
+//ini_set('session.save_path', $_SERVER['DOCUMENT_ROOT'] .'/slot-machine1/sessions');
 session_start();
 
 
