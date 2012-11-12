@@ -78,7 +78,6 @@ class Slot {
     $this->currentBet = 0;
     $new_payline = $this->get_new_payline();
     $paytable = Paytable::get_instance();
-    
     $win_combination_name = $paytable->paylines_matching_with_wins($new_payline);
     //user gets money he won
     $won_money = $paytable->payoff_value($new_payline) * $betFromClient;
