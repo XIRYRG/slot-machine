@@ -7,8 +7,13 @@ dump_it($cookie);*/
 //echo '123';
 
 try {
-  //$m = MyBitcoinClient::get_instance();
-  //echo $m->getbalance('900b15b28c5dbdb15fb626dbde50861b14274384');
+  
+  //echo 'https://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];
+  dump_it($_SERVER);
+  $m = MyBitcoinClient::get_instance();
+  echo $m->getbalance('900b15b28c5dbdb15fb626dbde50861b14274384');
+  echo '<br>';
+  $m->listreceivedbyaccount();
   //dump_it($m->getaddressesbyaccount('myWallet'));
   //dump_it($m->getinfo());
   //echo $m->getreceivedbyaccount('900b15b28c5dbdb15fb626dbde50861b14274384');
@@ -30,7 +35,7 @@ dump_it($u);
 
 */
 
-//show tables
-show_generated_total_weight_table();
-possible_combinations();
+//show stats tables
+//show_generated_total_weight_table();
+//possible_combinations();
 ?>

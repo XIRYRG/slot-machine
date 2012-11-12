@@ -1,5 +1,7 @@
 <?php
+//todo: relocate to https  
 require_once 'Appconfig.php';
+
 //auth/register new user
 $u1 = new User();
 $u1->auth();

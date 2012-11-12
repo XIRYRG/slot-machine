@@ -13,7 +13,6 @@ require_once 'Appconfig.php';
  * @author vadim24816
  */
 ?>
-     
 <?php
 class User {
   //make it singletone
@@ -34,8 +33,15 @@ class User {
   public $uid, $phpsessid, $user_wallet, $bitcoin_recieve_address, $money_balance, $affiliateusername, $remote_user_address;//, $bitcoin_recieve_address, $money_balance;
   
   public function auth(){
-    //SetCookie("uid",  '900b15b28c5dbdb15fb626dbde50861b14274384', AppConfig::now_plus_one_year(), '/');
-    $_COOKIE['uid'] = '900b15b28c5dbdb15fb626dbde50861b14274384';
+    $file = '';
+    $line = '';
+    //check for whether headers was already sent
+    if (headers_sent($file, $line)){
+      echo 'file: '.$file;
+      echo 'line: '.$line;
+    }
+    SetCookie("uid",  '900b15b28c5dbdb15fb626dbde50861b14274384', AppConfig::now_plus_one_year(), '/');
+    //$_COOKIE['uid'] = '900b15b28c5dbdb15fb626dbde50861b14274384';
     //todo: no DB connection exception!
     //user registered already
     if (!empty($_COOKIE['uid'])){// || !empty($_COOKIE['bitcoin_recieve_address'])){
@@ -102,7 +108,9 @@ class User {
       $this->bitcoin_recieve_address = $bitcoin_client_instance->getaccountaddress($this->uid);
     }
     catch (BitcoinClientException $e) {
-      echo $e->getMessage();
+      //todo: write exceptions to error/exceptions log file
+      //echo $e->getMessage();
+      //can't set cookie because of this error echo
     }
     $this->user_wallet = 'No_yet';
     $this->affiliateusername = 'Nobody';
@@ -165,12 +173,12 @@ class User {
     }
     //if user exists already just update record
     else {
+      //`updated_at` = '$this->updated_at',
       $q = "UPDATE users SET 
         `bitcoin_recieve_address` = '$this->bitcoin_recieve_address',
         `user_wallet` = '$this->user_wallet',
         `money_balance` = '$this->money_balance',
         `affiliateusername` = '$this->affiliateusername',
-        `created_at` = '$this->created_at',
         `remote_user_address` = '$this->remote_user_address'
         WHERE `uid` = '$this->uid'
       ";

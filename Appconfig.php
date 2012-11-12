@@ -17,6 +17,8 @@ ini_set('session.cookie_lifetime', AppConfig::now_plus_one_year());
 //ini_set('session.save_path', $_SERVER['DOCUMENT_ROOT'] .'/slot-machine1/sessions');
 session_start();
 
+//relocate browser to https
+require_once 'relocateToSecureScheme.php';
 
 require_once 'Dumpit.php';
 require_once 'DBconfig.php';
