@@ -16,7 +16,10 @@ require_once 'Appconfig.php';
 class Slot {
   //make it singletone
   protected static $slot;
+  protected static $log_every_spin;
   public static $user;
+  public static $bitcoin_account_name;
+  public static $bitcoin_address;
   private function __construct(){}
   private function __clone(){} 
   private function __wakeup(){} 
@@ -26,6 +29,16 @@ class Slot {
       //if user not exist it will create him!
       self::$user = new User();
       self::$user->auth();
+      //common account for all money in slot
+      self::$bitcoin_account_name = 'SlotBank';
+      $bitcoin_client_instance = MyBitcoinClient::get_instance();
+      //if account not exist - create it
+      self::$bitcoin_address = $bitcoin_client_instance->getaccountaddress(self::$bitcoin_account_name);
+      //if cant't create/get - exception
+      if (!self::$bitcoin_address){
+        throw new BitcoinClientException("Can't get/create slot account in bitcoind");;
+      }
+      self::$log_every_spin = true;
       //if (self::$user->get_from_db())
       //self::$slot->slot_filling();
       return self::$slot;
@@ -37,29 +50,49 @@ class Slot {
   protected $last_payline;//, $reels = array(3);
   public $reel1,$reel2,$reel3, $reels;
   public $currentBet, $currentUserBalance, $lastBet, $state;
+  
 
   //validate client's bet 
-  public function isValidBet($betFromClient){
+  public function is_valid_bet($bet_from_client){
     //not a number
-    if (!is_numeric($betFromClient)){
+    if (!is_numeric($bet_from_client)){
       return false;
     }
     self::$user->update_from_db();
-    if ($betFromClient > 0 && $betFromClient <= self::$user->money_balance){
+    if ($bet_from_client > 0 && $bet_from_client <= self::$user->money_balance){
       return true;
     }
     else {
       return false;
     }
   }
-
+  public function get_total_spin_number(){
+    $db = DBconfig::get_instance();
+    $query = 'SELECT COUNT(id) FROM spins';
+    $total_spin_number = $db->mysql_fetch_array($query);
+    return $total_spin_number[0];
+  }
+  
+  public function save_spin_in_db($uid, $user_bet, $payline, $won_money){
+    $db = DBconfig::get_instance();
+    $res = $db->query("INSERT INTO 
+      spins(uid, user_bet, payline, won_money, spin_time) 
+      VALUES('$uid', '$user_bet', '$payline', '$won_money', NOW())
+    ");
+    if (!$res) {
+      return FALSE;
+    }
+    return true;
+  }
+  
   //make spin
-  public function spin($betFromClient){
-    if (!$this->isValidBet($betFromClient)){
+  public function spin($bet_from_client){
+    //todo: limit the number of spins for the same uid (e.g.: 1 spin per 6 second
+    if (!$this->is_valid_bet($bet_from_client)){
       echo '[Bet <= 0 or Bet not number.]';
       return false;
     }
-    
+    /*
     //already started
     if ($this->state == 'started'){
       //console.log('[Slot started already. Wait while it have stoped! ]');
@@ -71,7 +104,8 @@ class Slot {
     $this->state = 'started';
     //$this->getStateStop();
     $this->state = 'stop';
-    $this->currentBet = $betFromClient;
+    */
+    $this->currentBet = $bet_from_client;
     //bet was 
     $this->lastBet = $this->currentBet;
     self::$user->money_balance -= $this->currentBet;
@@ -80,14 +114,15 @@ class Slot {
     $paytable = Paytable::get_instance();
     $win_combination_name = $paytable->paylines_matching_with_wins($new_payline);
     //user gets money he won
-    $won_money = $paytable->payoff_value($new_payline) * $betFromClient;
+    $won_money = $paytable->payoff_value($new_payline) * $bet_from_client;
     self::$user->money_balance += $won_money;
     $this->last_payline = $new_payline;
     $s = self::$user->save_in_db();
     self::$user->update_from_db();
+    //logging every spin (by default)
+    if (self::$log_every_spin)
+      $this->save_spin_in_db(self::$user->uid, $bet_from_client, $win_combination_name, $won_money );
     return json_encode($new_payline);
-    
-    //todo: save the last showed symbols
   }
 
   //return new randomly generated payline

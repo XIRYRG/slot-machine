@@ -167,25 +167,22 @@ class User {
     $db = DBconfig::get_instance();
     //if user not exist insert in DB
     if (!$this->is_user_exist($this->uid)){
-      $res = $db->query("INSERT INTO users (uid, bitcoin_recieve_address, user_wallet, money_balance, affiliateusername, created_at, remote_user_address) 
+      $res = $db->query( "INSERT INTO users (uid, bitcoin_recieve_address, user_wallet, money_balance, affiliateusername, created_at, remote_user_address) 
         VALUES ('$this->uid', '$this->bitcoin_recieve_address', '$this->user_wallet', '$this->money_balance', '$this->affiliateusername', NOW(), '$this->remote_user_address')");//NOW() == '$this->created_at',
       
     }
     //if user exists already just update record
     else {
       //`updated_at` = '$this->updated_at',
-      $q = "UPDATE users SET 
+      $res = $db->query( "UPDATE users SET 
         `bitcoin_recieve_address` = '$this->bitcoin_recieve_address',
         `user_wallet` = '$this->user_wallet',
         `money_balance` = '$this->money_balance',
         `affiliateusername` = '$this->affiliateusername',
         `remote_user_address` = '$this->remote_user_address'
         WHERE `uid` = '$this->uid'
-      ";
-      $res = $db->query($q);
-      return true;
+      ");
     }
-    
     if (!$res){
       return FALSE;
     }
@@ -193,11 +190,12 @@ class User {
     $this->get_from_db($this->uid);
     return true;
   }
+  //todo: money transfering
+  public function cash_in(){
+    //todo:
+  }
+  public function cash_out(){
+    //todo:
+  }
 }
-
-//$u1_serialized = serialize($u1);
-//SetCookie("uid",$u1->uid, $NOW_PLUS_ONE_YEAR, '/');
-//dump_it(unserialize($u1_serialized));
-//$u1->logout();
-
 ?>

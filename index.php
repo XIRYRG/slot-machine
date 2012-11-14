@@ -243,7 +243,8 @@ $u1->auth();
       background: url(images/bsm-symbol-empty.png);
     } 
   </style>
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+  <!--<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>-->
+  <script src="js/jquery.min.js"></script>
   <script type="text/javascript">
     function Slot(uid){
       //todo: get config for slot (on client side) via Ajax Or use default config described here
@@ -259,6 +260,19 @@ $u1->auth();
       this.arrayOfSymbolsId = new Array();
       this.onceFilledLine = false;
       this.onceStarted = false;
+      this.checkForNewIncommingPayment = function(){
+        $.post("AjaxRequestsProcessing.php", { slot: "checkForIncommingPayment"})
+          //todo: try/catch and in case bad request 
+        .success(function(balance) {
+          console.log(balance);
+          slot.syncWithServer();
+          //slot.currentPayline = eval( "("+balance+")");
+        })
+        .error(function(){
+          console.log('Client error. Error in ajax checkForIncommingPayment request, bad response');
+        })
+        ;
+      }
       this.sendToServerThatSpinPressed = function(){
         var slot = this;
         $.post("AjaxRequestsProcessing.php", { slot: "spinPressed", currentBet: slot.currentBet })//, function(paylineReturnedByServerSpin){
@@ -274,7 +288,7 @@ $u1->auth();
           slot.rememberLastShowedSymbols();
         })
         .error(function(){
-          console.log('Client error. Error in ajax spin request, no response');
+          console.log('Client error. Error in ajax spin request, bad response');
         })
         ;
       }
@@ -649,6 +663,7 @@ $u1->auth();
         }
       });
       
+      //setInterval(slot.checkForNewIncommingPayment, 10000);
     });
   </script>  
   <!--[if lt IE 9]>
@@ -674,7 +689,7 @@ $u1->auth();
       <img id="slots-logo" src="images/bsm-logo.png" alt="SatoshiSlots.com">
       <img id="slots-paytable" src="images/bsm-paytable.png" alt="Paytable">
       <div id="slots-address" class="slots-display"> <?php echo $u1->bitcoin_recieve_address; ?> </div>
-      <div id="slots-balance" class="slots-display">0<?php //echo $u1->money_balance; //todo: update without refresh!?></div>
+      <div id="slots-balance" class="slots-display">0</div>
       <div id="slots-bet" class="slots-display">0</div>
       <button id="slots-minus001" class="slots-button slots-minus"></button>
       <button id="slots-minus01" class="slots-button slots-minus"></button>
@@ -688,6 +703,17 @@ $u1->auth();
       <button id="slots-autoplay" class="slots-button slots-bottombutton"></button>
       <button id="slots-cashout" class="slots-button slots-bottombutton"></button>
     </div>
+  </div>
+  <div id="statistic">
+    <?php
+      //Transaction::show_transactions($option = 'last20');
+    ?>
+  </div>
+  <div id="interesting_facts">
+    Interesting facts
+    <?php
+      show_interesting_facts();
+    ?>
   </div>
 </body>
 </html>

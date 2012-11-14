@@ -29,7 +29,7 @@ $slot = Slot::get_instance();
 switch ($post_request) {
   case 'sync':
     //todo: make auth!!
-    $user->get_from_db($user->uid);
+    //$user->get_from_db($user->uid);
     if ($return_string = json_encode($user)){
       echo $return_string;
     }
@@ -41,11 +41,25 @@ switch ($post_request) {
       echo 'bet wasn\'t transferred';
       return false;
     }
+    //normal mode
     $betFromClient = $_POST['currentBet'];
     $json = $slot->spin($betFromClient);
     echo $json;
     break;
-
+  case 'checkForIncommingPayment':
+    $m = MyBitcoinClient::get_instance();
+    //$user->update_from_db();
+    //$user->money_balance = $m->getbalance($user->uid);
+    //$user->save_in_db();
+    $json = $user->money_balance;
+    echo $json;
+    break;
+  case 'getInterestingFacts':
+    $cashed_out_money = Transaction::get_total_cached_out_money();
+    $total_spin_number = $slot->get_total_spin_number();
+    $json = '{"cashed_out_money":"'.$cashed_out_money.'","games_played":"'.$total_spin_number.'"}';
+    echo $json;
+    break;
   default:
     break;
 }

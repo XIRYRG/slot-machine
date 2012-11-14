@@ -33,6 +33,7 @@ require_once 'Cookie.php';
 require_once 'User.php';
 require_once 'bitcoin/bitcoin.inc';
 require_once 'Slot.php';
+require_once 'Transaction.php';
 //Cookies should be enabled
 class AppConfig{
   /*
