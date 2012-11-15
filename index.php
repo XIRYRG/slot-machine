@@ -1,10 +1,18 @@
 <?php
-//todo: relocate to https  
-require_once 'Appconfig.php';
 
-//auth/register new user
-$u1 = new User();
-$u1->auth();
+try{
+  require_once 'Appconfig.php';
+  
+  //auth/register new user
+  //$u1 = new User();
+  $u1 = User::get_instance();
+  //$u1->auth();
+}
+catch (Exception $e){
+  dump_it($e->getTraceAsString());
+}
+
+
 
 ?>
 <!doctype html>
@@ -260,6 +268,19 @@ $u1->auth();
       this.arrayOfSymbolsId = new Array();
       this.onceFilledLine = false;
       this.onceStarted = false;
+      this.updateInterestingFacts = function(){
+        $.post("AjaxRequestsProcessing.php", { slot: "getInterestingFacts"})
+        .success(function(interestingFacts) {
+          var interestingFacts = eval( "("+interestingFacts+")");
+          $('td#total_cached_out').text('Cashed out money: '+ interestingFacts.cashed_out_money +' BTC');
+          $('td#total_spin_number').text('Games played: '+ interestingFacts.games_played);
+          //console.log(interestingFacts);
+        })
+        .error(function(){
+          console.log('Client error. Error in ajax updateInterestingFacts request, bad response');
+        })
+        ;
+      }
       this.checkForNewIncommingPayment = function(){
         $.post("AjaxRequestsProcessing.php", { slot: "checkForIncommingPayment"})
           //todo: try/catch and in case bad request 
@@ -437,9 +458,9 @@ $u1->auth();
       }
       this.rotationTime = {
         //rotation time for every reel in ms
-        reel1: 5000,
-        reel2: 6000,
-        reel3: 7000
+        reel1: 2000,
+        reel2: 3000,
+        reel3: 5000
       };
       //max spin time is the max time of every reel rotates
       this.maxSpinTime = Math.max(this.rotationTime.reel1,this.rotationTime.reel2,this.rotationTime.reel3);
@@ -590,8 +611,19 @@ $u1->auth();
       }
       
     }
+    
+    function get_cookie ( cookie_name )
+    {
+      var results = document.cookie.match ( '(^|;) ?' + cookie_name + '=([^;]*)(;|$)' );
+      if ( results )
+        return ( unescape ( results[2] ) );
+      else
+        return null;
+    }
+    
     $(document).ready(function(){
-      var uid = '<?php echo $u1->uid; ?>';
+      //var uid = '<?php//echo $u1->uid;?>';
+      var uid = get_cookie('uid');
       slot = new Slot(uid);
       slot.linesFilling();
       slot.syncWithServer();
@@ -662,6 +694,9 @@ $u1->auth();
             break;
         }
       });
+      //uncomment
+      //setInterval(slot.updateInterestingFacts, 10000);
+      
       
       //setInterval(slot.checkForNewIncommingPayment, 10000);
     });
@@ -670,10 +705,6 @@ $u1->auth();
   <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
   <![endif]-->
 </head>
-<?php
-
-
-?>
 <body>
   <div id="slots">
     <div id="slots-reel1" class="slots-reel">

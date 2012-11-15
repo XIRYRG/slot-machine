@@ -22,7 +22,7 @@ require_once 'relocateToSecureScheme.php';
 
 require_once 'Dumpit.php';
 require_once 'DBconfig.php';
-require_once 'Instawallet.php';
+//require_once 'Instawallet.php';
 require_once 'MyBitcoinClient.php';
 require_once 'Randomizer.php';
 require_once 'Symbol.php';
@@ -34,6 +34,7 @@ require_once 'User.php';
 require_once 'bitcoin/bitcoin.inc';
 require_once 'Slot.php';
 require_once 'Transaction.php';
+require_once 'functions.php';
 //Cookies should be enabled
 class AppConfig{
   /*

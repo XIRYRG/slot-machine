@@ -21,10 +21,12 @@ else {
 }
 
 //$get_request = $_GET['slot'];
-$user = new User();
-$user->auth();
-$slot = Slot::get_instance();
-//$post_request = '';
+//$user = new User();
+
+$user = User::get_instance();
+//$user->auth();
+$slot = Slot::get_instance($user);
+
 
 switch ($post_request) {
   case 'sync':
@@ -54,6 +56,7 @@ switch ($post_request) {
     $json = $user->money_balance;
     echo $json;
     break;
+  //todo: checking if the same user makes requests too often
   case 'getInterestingFacts':
     $cashed_out_money = Transaction::get_total_cached_out_money();
     $total_spin_number = $slot->get_total_spin_number();

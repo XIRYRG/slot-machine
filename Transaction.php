@@ -101,19 +101,4 @@ class Transaction {
   }
 
 }
-function show_interesting_facts() {
-  $total_cached_out = Transaction::get_total_cached_out_money();
-  $slot = Slot::get_instance();
-  $total_spin_number = $slot->get_total_spin_number();
-  $output = "
-    <br />
-    <table border=\"1px\" style=\"border-collapse: collapse;\">
-      <tr>
-        <td>Cashed out money: $total_cached_out BTC</td>
-        <td>Games played: $total_spin_number </td>
-      </tr>
-    </table>
-  ";
-  echo $output;
-}
 ?>

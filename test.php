@@ -1,13 +1,13 @@
 <?php
 require_once 'Appconfig.php';
-/*
-$cookie = Cookie::get_instance();
-echo $cookie->get_cookie('<asdfasf>');
-dump_it($cookie);*/
-//echo '123';
 
 try {
-  Transaction::show_transactions($option = 'last20');
+  $user = User::get_instance();
+  //$u->auth();
+  dump_it($user);
+  $slot = Slot::get_instance($user);
+  dump_it($slot);
+  //Transaction::show_transactions($option = 'last20');
   
   //$t = new Transaction();
   //$t->get_from_db('asfdasfd');
@@ -16,8 +16,12 @@ try {
   //dump_it($t);
   //echo 'https://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];
   //dump_it($_SERVER);
-  /*
+  
   $m = MyBitcoinClient::get_instance();
+  dump_it($m->can_connect());
+  dump_it($m);
+  
+  /*
   echo $m->getbalance('900b15b28c5dbdb15fb626dbde50861b14274384');
   echo '<br>';
   echo $m->getbalance('SlotBank');

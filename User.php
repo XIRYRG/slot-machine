@@ -16,7 +16,7 @@ require_once 'Appconfig.php';
 <?php
 class User {
   //make it singletone
-  /*
+  
   protected static $user;
   private function __construct(){}
   private function __clone(){} 
@@ -29,7 +29,7 @@ class User {
     }
     return self::$user;
   }
-  */
+  
   public $uid, $phpsessid, $user_wallet, $bitcoin_recieve_address, $money_balance, $affiliateusername, $remote_user_address;//, $bitcoin_recieve_address, $money_balance;
   
   public function auth(){
@@ -40,7 +40,7 @@ class User {
       echo 'file: '.$file;
       echo 'line: '.$line;
     }
-    SetCookie("uid",  '900b15b28c5dbdb15fb626dbde50861b14274384', AppConfig::now_plus_one_year(), '/');
+    //SetCookie("uid",  '900b15b28c5dbdb15fb626dbde50861b14274384', AppConfig::now_plus_one_year(), '/');
     //$_COOKIE['uid'] = '900b15b28c5dbdb15fb626dbde50861b14274384';
     //todo: no DB connection exception!
     //user registered already
@@ -51,6 +51,15 @@ class User {
       //search for user by given uid
       if ($this->get_from_db($uid)){
         $this->phpsessid = session_id();
+      }
+      //what if uid hadn't found in db?
+      else{
+        try{
+          throw new Exception('User hadn\'t found in database. Please clear cookies in your browser');
+        }
+        catch (Exception $e){
+          dump_it($e->getTraceAsString());
+        }
       }
     }
     //user visits first time
@@ -64,8 +73,10 @@ class User {
       }
        * 
        */
-      if (!$this->reg())
-        throw new Exception('Can\'t register new user');
+      if (!$this->reg()){
+        dump_it($e->getTraceAsString());
+        //throw new Exception('Can\'t register new user');
+      }
     }
     return $this;
   }
@@ -84,19 +95,13 @@ class User {
     if (!empty($_SERVER['REMOTE_ADDR'])){
       $remote_user_address = $_SERVER['REMOTE_ADDR'];
     }
-    
     $this->phpsessid = session_id();
-    //$this->uid = sha1(session_id());
-    
     //if this uid has had in DB already it generates new uid
     $this->uid = sha1(uniqid(""));
-    //echo $this->uid;
     while($this->get_from_db($this->uid)){
       $this->uid = sha1(uniqid(""));
     }
-    //echo '<br>';
-    //echo $this->uid;
-    $this->money_balance = 50;
+    $this->money_balance = 10250;
     
     //create the new wallet for new user
     $bitcoin_client_instance = MyBitcoinClient::get_instance();
@@ -109,7 +114,7 @@ class User {
     }
     catch (BitcoinClientException $e) {
       //todo: write exceptions to error/exceptions log file
-      //echo $e->getMessage();
+      dump_it($e->getTraceAsString());
       //can't set cookie because of this error echo
     }
     $this->user_wallet = 'No_yet';
@@ -118,6 +123,13 @@ class User {
     //e.g.:                  04:34:19 11.11.2012
     $this->created_at = date('h:i:s d.m.Y');
     if ($this->save_in_db()){
+      $file = '';
+      $line = '';
+      //check for whether headers was already sent
+      if (headers_sent($file, $line)){
+        echo 'file: '.$file;
+        echo 'line: '.$line;
+      }
       SetCookie("uid",  $this->uid, AppConfig::now_plus_one_year(), '/');
       //todo: set it when user have sent money to slot
       SetCookie("user_wallet",  $this->user_wallet, AppConfig::now_plus_one_year(), '/');
@@ -129,7 +141,12 @@ class User {
   }
   //get user record from db
   function get_from_db($uid){
-    $uid = mysql_real_escape_string($uid);
+    try{
+      $uid = mysql_real_escape_string($uid);
+    }
+    catch (Exception $e){
+      dump_it($e->getTraceAsString());
+    }
     $db = DBconfig::get_instance();
     $user = $db->mysql_fetch_array('SELECT * FROM users WHERE uid = \''.$uid.'\'');
     //if there is no user with given uid
