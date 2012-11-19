@@ -45,7 +45,7 @@ switch ($post_request) {
     }
     //normal mode
     $betFromClient = $_POST['currentBet'];
-    $json = $slot->spin($betFromClient);
+    $json = json_encode($slot->spin($betFromClient));
     echo $json;
     break;
   case 'checkForIncommingPayment':
@@ -63,6 +63,41 @@ switch ($post_request) {
     $json = '{"cashed_out_money":"'.$cashed_out_money.'","games_played":"'.$total_spin_number.'"}';
     echo $json;
     break;
+  case 'power':
+    //for admin only!
+    if (!$_SESSION['admin']){
+      echo 'You are not logged as admin';
+      return false;
+    }
+    if (!empty($_POST['power']) && $_POST['power'] == 'checkPower'){
+      echo $slot->power_on;
+      return true;
+    }
+    if (empty($_POST['power']) || ($_POST['power'] != 'on' && $_POST['power'] != 'off')){
+      echo $_POST['power'];
+      return false;
+    }
+    
+    if ($res = $slot->power_switch($_POST['power'])){
+      echo $res;  
+      //echo 'Slot '. $_POST['power'];
+    }
+    else{
+      echo 'Nothing';
+    }
+    break;
+    case 'transactions':
+      if (!$_SESSION['admin']){
+        echo 'You are not logged as admin';
+        return false;
+      }
+      if (!empty($_POST['fromDate']) && !empty($_POST['toDate'])){
+        $fromDate = mysql_real_escape_string($_POST['fromDate']);
+        $toDate = mysql_real_escape_string($_POST['toDate']);
+        $table = Transaction::show_transactions('admin', 10, $fromDate, $toDate);
+        echo $table;
+      }
+      break;
   default:
     break;
 }

@@ -12,247 +12,16 @@ catch (Exception $e){
   dump_it($e->getTraceAsString());
 }
 
-
-
 ?>
 <!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
   <title>Bitcoin Slot Machine</title>
-  <style type="text/css">
-    body {
-      background: url(images/test-bg.jpg) #0a1d35;
-      color: white;
-    }
-    div#slots {
-      position: relative;
-      width: 900px;
-      height: 700px;
-      z-index: 1;
-      margin: 50px auto;
-    }
-    div.slots-reel {
-      position: absolute;
-      top: 125px;
-      z-index: 1;
-      width: 100px;
-      height: 375px;
-      background: #000;
-      overflow: hidden;
-    }
-    div#slots-reel1 {
-      left: 125px;
-    }
-    div#slots-reel2 {
-      left: 237px;
-    }
-    div#slots-reel3 {
-      left: 349px;
-    }
-    
-    div#slots-body {
-      position: absolute;
-      top: 0;
-      left: 0;
-      z-index: 2;
-      width: 900px;
-      height: 700px;
-      background: url(images/bsm-body.png);
-    }    
-    
-    div#slots-body > * {
-      position: absolute;
-      z-index: 3;
-      overflow: hidden;
-    }        
-    
-    img#slots-logo {
-      top: 96px;
-      left: 96px;
-    }
-    img#slots-paytable {
-      top: 162px;
-      left: 638px;
-    }
-    
-    div.slots-display {
-      font-family: Tahoma, Arial, Helvetica, sans-serif;
-      text-align: center;
-      color: #3986ff;
-      text-shadow: 0 0 6px #2982f2, 0 0 1px #2982f2;
-    }
-    
-    div#slots-address {
-      top: 534px;
-      left: 578px;
-      width: 232px;
-      height: 24px;
-      padding-top: 4px;
-      font-size: 13px;
-      letter-spacing: -1px;
-    }
-    
-    div#slots-balance {
-      top: 578px;
-      left: 578px;
-      width: 112px;
-      height: 29px;
-      padding-top: 5px;
-      font-size: 16px;
-      font-weight: bold;
-      text-align: right;
-    }  
-    div#slots-bet {
-      top: 516px;
-      left: 242px;
-      width: 92px;
-      height: 36px;
-      padding-top: 6px;
-      font-size: 22px;
-      font-weight: bold;
-    }       
-    
-    button.slots-button {
-      background: url(images/bsm-buttons.png);
-      border: 0;
-      cursor: pointer;
-      outline: none;
-    }
-    
-    button.slots-plus {
-      left: 348px;
-      width: 25px;
-      height: 26px;
-      background-position: 0 0;
-    }
-    button.slots-plus:hover {
-      background-position: -25px 0;
-    }
-    button.slots-plus:active {
-      background-position: -50px 0;
-    }
-
-    button.slots-minus {
-      left: 203px;
-      width: 25px;
-      height: 26px;
-      background-position: 0 -26px;
-    }
-    button.slots-minus:hover {
-      background-position: -25px -26px;
-    }
-    button.slots-minus:active {
-      background-position: -50px -26px;
-    }
-    
-    button#slots-plus001, button#slots-minus001 {
-      top: 486px;
-    }
-    button#slots-plus01, button#slots-minus01 {
-      top: 513px;
-    }
-    button#slots-plus1, button#slots-minus1 {
-      top: 540px;
-    }
-
-    button#slots-spin {
-      top: 515px;
-      left: 461px;
-      width: 98px;
-      height: 98px;
-      background-position: 1px -191px;
-    }
-    button#slots-spin:hover {
-      background-position: -97px -191px;
-    }
-    button#slots-spin:active {
-      background-position: -195px -191px;
-    }
-    
-    button.slots-bottombutton {
-      top: 570px;
-      width: 108px;
-      height: 46px;
-    }
-    
-    button#slots-lastbet {
-      left: 121px;
-      background-position: 0 -98px;
-    }
-    button#slots-lastbet:hover {
-      background-position: -108px -98px;
-    }
-    button#slots-lastbet:active {
-      background-position: -216px -98px;
-    }
-
-    button#slots-maxbet {
-      left: 233px;
-      background-position: 0 -52px;
-    }
-    button#slots-maxbet:hover {
-      background-position: -108px -52px;
-    }
-    button#slots-maxbet:active {
-      background-position: -216px -52px;
-    }
-
-    button#slots-autoplay {
-      left: 345px;
-      background-position: 0 -144px;
-    }
-    button#slots-autoplay:hover {
-      background-position: -108px -144px;
-    }
-    button#slots-autoplay:active {
-      background-position: -216px -144px;
-    }    
-    
-    button#slots-cashout {
-      top: 571px;
-      left: 709px;
-      width: 82px;
-      background-position: -75px 0;
-    }
-    button#slots-cashout:hover {
-      background-position: -157px 0;
-    }
-    button#slots-cashout:active {
-      background-position: -239px 0;
-    }        
-    
-    div.slots-line {
-      width: 100px;
-    }
-    div.slots-line > div {
-      width: 100px;
-      height: 125px;
-    }
-    div.slots-symbol0 {
-      background: url(images/bsm-symbol-nwo.png);
-    }    
-    div.slots-symbol1 {
-      background: url(images/bsm-symbol-bitcoin.png);
-    }    
-    div.slots-symbol2 {
-      background: url(images/bsm-symbol-anon.png);
-    }    
-    div.slots-symbol3 {
-      background: url(images/bsm-symbol-onion.png);
-    }    
-    div.slots-symbol4 {
-      background: url(images/bsm-symbol-anarchy.png);
-    }    
-    div.slots-symbol5 {
-      background: url(images/bsm-symbol-peace.png);
-    }    
-    div.slots-symbol6 {
-      background: url(images/bsm-symbol-empty.png);
-    } 
-  </style>
+  <link href="css/style.css" rel="stylesheet">
   <!--<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>-->
   <script src="js/jquery.min.js"></script>
+  <script src="bootstrap/js/bootstrap.min.js"></script>
   <script type="text/javascript">
     function Slot(uid){
       //todo: get config for slot (on client side) via Ajax Or use default config described here
@@ -268,6 +37,58 @@ catch (Exception $e){
       this.arrayOfSymbolsId = new Array();
       this.onceFilledLine = false;
       this.onceStarted = false;
+      this.musicOn = true;
+      //this.audio = new Audio();
+      //
+      this.audio = {
+        spin5sec: null,
+        win: null,
+        loose: null,
+        spinbutton: null,
+        //in case if buttons pressed oftenly
+        buttons: {
+          element: null,
+          play: function(){
+            //stop emulation
+            slot.audio.buttons.element.pause();
+            slot.audio.buttons.element.currentTime = 0;
+            slot.audio.buttons.element.play();
+          }
+        }
+      }
+      this.initAudio = function(){
+        var slot = this;
+        slot.audio.spin5sec = document.getElementById('spin5sec');
+        slot.audio.win = document.getElementById('win');
+        slot.audio.loose = document.getElementById('loose');
+        slot.audio.spinbutton = document.getElementById('spinbutton');
+        slot.audio.buttons.element = document.getElementById('buttons');
+      }
+      this.isWin = function(){
+        if (slot.currentPayline.multiplier > 0){
+          return true;
+        }
+        else{
+          return false;
+        }
+      }
+      this.statusDisplay = {
+        slot : this,
+        show : function(){
+          //if (slot.currentPayline.multiplier > 0){
+          if (slot.isWin()){
+            $('div#slots-status-display').text('You have WON! ('+slot.currentPayline.multiplier+'x'+slot.currentPayline.bet_from_client+')');
+            slot.audio.win.play();
+          }
+          else{
+            $('div#slots-status-display').text('');
+            slot.audio.loose.play();
+          }
+        },
+        clear : function(){
+          $('div#slots-status-display').text('');
+        }
+      };
       this.updateInterestingFacts = function(){
         $.post("AjaxRequestsProcessing.php", { slot: "getInterestingFacts"})
         .success(function(interestingFacts) {
@@ -278,8 +99,7 @@ catch (Exception $e){
         })
         .error(function(){
           console.log('Client error. Error in ajax updateInterestingFacts request, bad response');
-        })
-        ;
+        });
       }
       this.checkForNewIncommingPayment = function(){
         $.post("AjaxRequestsProcessing.php", { slot: "checkForIncommingPayment"})
@@ -487,8 +307,9 @@ catch (Exception $e){
           console.log('[Current bet = 0. Not worth the trouble]');
           return;
         }
+        slot.audio.spin5sec.play();
+        slot.statusDisplay.clear();
         //restore last showed symbols if there is last show exists
-        
         slot.linesFilling();
         if (slot.onceStarted){
             slot.restoreLastShowedSymbols();
@@ -512,8 +333,14 @@ catch (Exception $e){
         //sync the result with the server
         setTimeout('slot.syncWithServer()', slot.maxSpinTime-200);
         //set last bet as current bet after spin
+        //if (slot.currentBet == 0){
         setTimeout('slot.setBetTo(slot.getLastBet())', slot.maxSpinTime+200);
+        //}
+        setTimeout('slot.statusDisplay.show()', slot.maxSpinTime+100);
+        //check for win
+        //setTimeout('slot.isWin()',slot.maxSpinTime+100);
         slot.onceStarted = true;
+        return true;
       }
       this.animateSlot = function(){
         var slot = this;
@@ -622,23 +449,30 @@ catch (Exception $e){
     }
     
     $(document).ready(function(){
-      //var uid = '<?php//echo $u1->uid;?>';
-      var uid = get_cookie('uid');
+      var uid = '<?php echo $u1->uid;?>';
+      //var uid = get_cookie('uid');
       slot = new Slot(uid);
       slot.linesFilling();
       slot.syncWithServer();
+      slot.initAudio();
       $('button#slots-spin').on('click', function(){
-        slot.spin();
+        if (slot.spin()){
+          slot.audio.spinbutton.play();
+          //slot.audio.spin5sec.play();//into spin()
+        }
       });
       
       $('button#slots-maxbet').on('click', function(){
+        slot.audio.buttons.play();
         slot.makeMaxBet();
       });
       $('button#slots-autoplay').on('click', function(){
+        slot.audio.buttons.play();
         clearInterval(slot.intervalID);
-        if (!slot.autoplay){
+        if (!slot.autoplay && slot.currentBet != 0){
           slot.autoplay = true;
           slot.spin();
+          //slot.audio.spin5sec.play();
           //setInterval(function(){
           slot.intervalID = setInterval(function(){
             console.log('autoplay');
@@ -660,11 +494,14 @@ catch (Exception $e){
         }
       });
       $('button#slots-lastbet').on('click', function(){
+        slot.audio.buttons.play();
         slot.setBetTo(slot.getLastBet());
       });
       //plus
       $('button.slots-plus').on('click', function(){
-        console.log(this.id);
+        //slot.audio.buttons.pause();
+        //slot.audio.buttons.currentTime = 0;
+        slot.audio.buttons.play();
         var buttonPlusId = this.id;
         switch(buttonPlusId){
           case 'slots-plus001':
@@ -680,7 +517,7 @@ catch (Exception $e){
       });
       //minus
       $('button.slots-minus').on('click', function(){
-        console.log(this.id);
+        slot.audio.buttons.play();
         var buttonPlusId = this.id;
         switch(buttonPlusId){
           case 'slots-minus001':
@@ -694,6 +531,13 @@ catch (Exception $e){
             break;
         }
       });
+      $('button#slots-cashout').on('click', function(){
+        slot.audio.buttons.play();
+        
+      });
+      
+      
+      
       //uncomment
       //setInterval(slot.updateInterestingFacts, 10000);
       
@@ -716,6 +560,9 @@ catch (Exception $e){
     <div id="slots-reel3" class="slots-reel">
       <div class="slots-line"></div>
     </div>
+    <div id="slots-status">
+      <div id="slots-status-display"></div>
+    </div>
     <div id="slots-body">
       <img id="slots-logo" src="images/bsm-logo.png" alt="SatoshiSlots.com">
       <img id="slots-paytable" src="images/bsm-paytable.png" alt="Paytable">
@@ -737,7 +584,12 @@ catch (Exception $e){
   </div>
   <div id="statistic">
     <?php
-      //Transaction::show_transactions($option = 'last20');
+      echo 'Last 20 transactions: <br />';
+      Transaction::show_transactions($option = 'last');
+      echo '<a href="">Full list</a><br /><br />';
+      echo '20 biggest winners: <br />';
+      Transaction::show_transactions($option = 'biggestwinners');
+      echo '<a href="">Full list</a><br />';
     ?>
   </div>
   <div id="interesting_facts">
@@ -745,6 +597,28 @@ catch (Exception $e){
     <?php
       show_interesting_facts();
     ?>
+  </div>
+  <div id="audio">
+    <audio id="spin5sec" preload="auto">
+      <source src="sounds/mp3/Spin_5sec.mp3" type="audio/mpeg" >
+      <source src="sounds/wav/Spin_5sec.wav" type="audio/wav" >
+    </audio>
+    <audio id="win" preload="auto">
+      <source src="sounds/mp3/Win.mp3" type="audio/mpeg" >
+      <source src="sounds/wav/Win.wav" type="audio/wav" >
+    </audio>
+    <audio id="loose" preload="auto">
+      <source src="sounds/mp3/Loose.mp3" type="audio/mpeg" >
+      <source src="sounds/wav/Loose.wav" type="audio/wav" >
+    </audio>
+    <audio id="spinbutton" preload="auto">
+      <source src="sounds/mp3/Button_SPIN_only.mp3" type="audio/mpeg" >
+      <source src="sounds/wav/Button_SPIN_only.wav" type="audio/wav" >
+    </audio>
+    <audio id="buttons" preload="auto">
+      <source src="sounds/mp3/Button_all_the_rest.mp3" type="audio/mpeg" >
+      <source src="sounds/wav/Button_All_the_rest.wav" type="audio/wav" >
+    </audio>
   </div>
 </body>
 </html>

@@ -48,13 +48,4 @@ class AppConfig{
     return time()+60*60*24*366;
   }
 }
-/*
-echo '<pre>';
-echo ' <br />$_COOKIE: ';
-var_dump($_COOKIE);
-echo '<br />$_SESSION: ';
-var_dump($_SESSION);
-echo '</pre>';
- * 
- */
 ?>

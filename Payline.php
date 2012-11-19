@@ -15,8 +15,10 @@ require_once 'Appconfig.php';
 //array of 3 symbols like: ['pyramid', 'bitcoin', 'anonymous']
 class Payline {
   public $sym1, $sym2, $sym3;
+  public $multiplier, $bet_from_client;
+
   //make the object with given symbols
-  public function __construct($sym1, $sym2, $sym3) {
+  public function __construct($sym1, $sym2, $sym3, $multiplier = 0, $bet_from_client = 0) {
     if (!Symbol::is_symbol($sym1) || !Symbol::is_symbol($sym2) || !Symbol::is_symbol($sym3)){
       echo 'Not a symbols was given';
       return;
@@ -24,6 +26,9 @@ class Payline {
     $this->sym1 = $sym1;
     $this->sym2 = $sym2;
     $this->sym3 = $sym3;
+    
+    $this->bet_from_client = $bet_from_client;
+    $this->$multiplier = $multiplier;
   }
   //return symbols as array
   public function get_symbols_array(){

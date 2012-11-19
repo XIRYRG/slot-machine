@@ -1,0 +1,268 @@
+/* 
+    Document   : style
+    Created on : Nov 16, 2012, 5:19:30 AM
+    Author     : vadim24816
+    Description:
+        Purpose of the stylesheet follows.
+*/
+
+body {
+  background: url(../images/test-bg.jpg) #0a1d35;
+  color: white;
+}
+div#slots {
+  position: relative;
+  width: 900px;
+  height: 700px;
+  z-index: 1;
+  margin: 0 auto;
+}
+div.slots-reel {
+  position: absolute;
+  top: 125px;
+  z-index: 1;
+  width: 100px;
+  height: 375px;
+  background: #000;
+  overflow: hidden;
+}
+div#slots-reel1 {
+  left: 125px;
+}
+div#slots-reel2 {
+  left: 237px;
+}
+div#slots-reel3 {
+  left: 349px;
+}
+
+div#slots-body {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 2;
+  width: 900px;
+  height: 700px;
+  background: url(../images/bsm-body.png);
+}    
+
+div#slots-body > * {
+  position: absolute;
+  z-index: 3;
+  overflow: hidden;
+}        
+
+img#slots-logo {
+  top: 60px;
+  left: 96px;
+}
+img#slots-paytable {
+  top: 162px;
+  left: 638px;
+}
+
+div.slots-display {
+  font-family: Tahoma, Arial, Helvetica, sans-serif;
+  text-align: center;
+  color: #3986ff;
+  text-shadow: 0 0 6px #2982f2, 0 0 1px #2982f2;
+}
+
+div#slots-address {
+  top: 534px;
+  left: 578px;
+  width: 232px;
+  height: 24px;
+  padding-top: 4px;
+  font-size: 13px;
+  letter-spacing: -1px;
+}
+
+div#slots-balance {
+  top: 578px;
+  left: 578px;
+  width: 112px;
+  height: 29px;
+  padding-top: 5px;
+  font-size: 16px;
+  font-weight: bold;
+  text-align: right;
+}  
+div#slots-bet {
+  top: 516px;
+  left: 242px;
+  width: 92px;
+  height: 36px;
+  padding-top: 6px;
+  font-size: 22px;
+  font-weight: bold;
+}       
+
+button.slots-button {
+  background: url(../images/bsm-buttons.png);
+  border: 0;
+  cursor: pointer;
+  outline: none;
+}
+
+button.slots-plus {
+  left: 348px;
+  width: 25px;
+  height: 26px;
+  background-position: 0 0;
+}
+button.slots-plus:hover {
+  background-position: -25px 0;
+}
+button.slots-plus:active {
+  background-position: -50px 0;
+}
+
+button.slots-minus {
+  left: 203px;
+  width: 25px;
+  height: 26px;
+  background-position: 0 -26px;
+}
+button.slots-minus:hover {
+  background-position: -25px -26px;
+}
+button.slots-minus:active {
+  background-position: -50px -26px;
+}
+
+button#slots-plus001, button#slots-minus001 {
+  top: 486px;
+}
+button#slots-plus01, button#slots-minus01 {
+  top: 513px;
+}
+button#slots-plus1, button#slots-minus1 {
+  top: 540px;
+}
+
+button#slots-spin {
+  top: 515px;
+  left: 461px;
+  width: 98px;
+  height: 98px;
+  background-position: 1px -191px;
+}
+button#slots-spin:hover {
+  background-position: -97px -191px;
+}
+button#slots-spin:active {
+  background-position: -195px -191px;
+}
+
+button.slots-bottombutton {
+  top: 570px;
+  width: 108px;
+  height: 46px;
+}
+
+button#slots-lastbet {
+  left: 121px;
+  background-position: 0 -98px;
+}
+button#slots-lastbet:hover {
+  background-position: -108px -98px;
+}
+button#slots-lastbet:active {
+  background-position: -216px -98px;
+}
+
+button#slots-maxbet {
+  left: 233px;
+  background-position: 0 -52px;
+}
+button#slots-maxbet:hover {
+  background-position: -108px -52px;
+}
+button#slots-maxbet:active {
+  background-position: -216px -52px;
+}
+
+button#slots-autoplay {
+  left: 345px;
+  background-position: 0 -144px;
+}
+button#slots-autoplay:hover {
+  background-position: -108px -144px;
+}
+button#slots-autoplay:active {
+  background-position: -216px -144px;
+}    
+
+button#slots-cashout {
+  top: 571px;
+  left: 709px;
+  width: 82px;
+  background-position: -75px 0;
+}
+button#slots-cashout:hover {
+  background-position: -157px 0;
+}
+button#slots-cashout:active {
+  background-position: -239px 0;
+}        
+
+div.slots-line {
+  width: 100px;
+}
+div.slots-line > div {
+  width: 100px;
+  height: 125px;
+}
+div.slots-symbol0 {
+  background: url(../images/bsm-symbol-nwo.png);
+}    
+div.slots-symbol1 {
+  background: url(../images/bsm-symbol-bitcoin.png);
+}    
+div.slots-symbol2 {
+  background: url(../images/bsm-symbol-anon.png);
+}    
+div.slots-symbol3 {
+  background: url(../images/bsm-symbol-onion.png);
+}    
+div.slots-symbol4 {
+  background: url(../images/bsm-symbol-anarchy.png);
+}    
+div.slots-symbol5 {
+  background: url(../images/bsm-symbol-peace.png);
+}    
+div.slots-symbol6 {
+  background: url(../images/bsm-symbol-empty.png);
+}
+    
+/* display styling added 13.11.12: */    
+div#slots-status {
+  position: absolute;
+  top: 649px;
+  /*top: 500px;*/
+  left: 146px;
+  width: 538px;
+  height: 119px;
+  overflow: hidden;
+  background: url(../images/bsm-info-display.png) top center;
+}
+div#slots-status-display {
+  position: absolute;
+  width: 346px;
+  height: 26px;
+  padding: 0 0 0 0;
+  left: 135px;
+  top: 54px;
+  font-family: Tahoma, Arial, Helvetica, sans-serif;
+  text-align: center;
+  font-size: 20px;
+  color: #3986ff;
+  text-shadow: 0 0 6px #2982f2, 0 0 1px #2982f2;      
+}
+div#interesting_facts, div#statistic{
+  position: relative;
+  margin: 0 auto;
+  width: 400px;
+  top: 100px;
+}

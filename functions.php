@@ -18,7 +18,9 @@ function show_interesting_facts() {
 
 function show_generated_total_weight_table() {
   echo 'generated the number  of appearances table';
-  $w1 = WeightTable::get_instance();
+  //$w1 = WeightTable::get_instance();
+  $user = User::get_instance();
+  $w1 = Slot::get_instance($user);
   echo '<table border="1px" style="border-collapse: collapse;">';
   echo '<tr>';
     
@@ -230,7 +232,7 @@ function possible_combinations(){
   echo '<td>'.$total_probability_of_apear.'</td>';
   echo '<td>sum=</td>';
   echo '<td>'.$total_sum.'</td>';
-  echo '<td> paid - deposited = '.$total_money.'</td>';
+  echo '<td> profit(deposited - paid) = '.$total_money*(-1).'</td>';
   echo '</tr>';
   echo '</table>';
 }

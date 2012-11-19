@@ -102,21 +102,25 @@ class User {
       $this->uid = sha1(uniqid(""));
     }
     $this->money_balance = 10250;
-    
+    //uncomment
     //create the new wallet for new user
+    /*
     $bitcoin_client_instance = MyBitcoinClient::get_instance();
     //no connection with bitcoin server
-    if (!$bitcoin_client_instance->can_connect()){
-      throw new BitcoinClientException("No connection with bitcoin server");
+    if ($bitcoin_client_instance->can_connect()){
+      //throw new BitcoinClientException("No connection with bitcoin server");
+
+      try{//to get bitcoin_recieve_address
+        $this->bitcoin_recieve_address = $bitcoin_client_instance->getaccountaddress($this->uid);
+      }
+      catch (BitcoinClientException $e) {
+        //todo: write exceptions to error/exceptions log file
+        dump_it($e->getTraceAsString());
+        //can't set cookie because of this error echo
+      }
     }
-    try{//to get bitcoin_recieve_address
-      $this->bitcoin_recieve_address = $bitcoin_client_instance->getaccountaddress($this->uid);
-    }
-    catch (BitcoinClientException $e) {
-      //todo: write exceptions to error/exceptions log file
-      dump_it($e->getTraceAsString());
-      //can't set cookie because of this error echo
-    }
+     * 
+     */
     $this->user_wallet = 'No_yet';
     $this->affiliateusername = 'Nobody';
     $this->remote_user_address = $remote_user_address;

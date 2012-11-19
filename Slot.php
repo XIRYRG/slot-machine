@@ -33,9 +33,21 @@ class Slot {
       self::$user = $user;
       //common account for all money in slot
       self::$bitcoin_account_name = 'SlotBank';
-      
+      //uncomment
+      /*
       $bitcoin_client_instance = MyBitcoinClient::get_instance();
-      self::$bitcoin_address = $bitcoin_client_instance->getaccountaddress(self::$bitcoin_account_name);
+      if ($bitcoin_client_instance->can_connect()){
+        try{
+
+          self::$bitcoin_address = $bitcoin_client_instance->getaccountaddress(self::$bitcoin_account_name);
+        }
+        catch (Exception $e){
+          dump_it($e->getTraceAsString());
+        }
+      }
+       * 
+       * 
+       */
       /*
       try{
         $bitcoin_client_instance = MyBitcoinClient::get_instance();
@@ -67,6 +79,7 @@ class Slot {
       self::$slot->reels[0] = self::$slot->reel1;
       self::$slot->reels[1] = self::$slot->reel2;
       self::$slot->reels[2] = self::$slot->reel3;
+      self::$slot->power_on = true;
       return self::$slot;
     }
     return self::$slot;
@@ -75,6 +88,7 @@ class Slot {
   protected $last_payline;//, $reels = array(3);
   public $reel1,$reel2,$reel3, $reels;
   public $currentBet, $currentUserBalance, $lastBet, $state;
+  public $power_on;// = true;
   
 
   //validate client's bet 
@@ -109,9 +123,30 @@ class Slot {
     }
     return true;
   }
-  
+  public function power_switch($power){
+    if (!$_SESSION['admin']){
+      return false;
+    }
+    switch ($power) {
+      case 'on':
+        $this->power_on = true;
+        break;
+      case 'off':
+        $this->power_on = false;
+        break;
+      default:
+        $this->power_on = true;
+        break;
+    }
+    return $power;
+  }
+
   //make spin
   public function spin($bet_from_client){
+    if ($this->power_on === false){
+      echo 'Slot-machine powered off. Please wait';
+      return false;
+    }
     //todo: limit the number of spins for the same uid (e.g.: 1 spin per 6 second
     if (!$this->is_valid_bet($bet_from_client)){
       echo '[Bet <= 0 or Bet not number.]';
@@ -141,13 +176,17 @@ class Slot {
     //user gets money he won
     $won_money = $paytable->payoff_value($new_payline) * $bet_from_client;
     self::$user->money_balance += $won_money;
+    //...
+    $new_payline->bet_from_client = $bet_from_client;
+    $new_payline->multiplier = $paytable->payoff_value($new_payline);
+    
     $this->last_payline = $new_payline;
     $s = self::$user->save_in_db();
     self::$user->update_from_db();
     //logging every spin (by default)
     if (self::$log_every_spin)
       $this->save_spin_in_db(self::$user->uid, $bet_from_client, $win_combination_name, $won_money );
-    return json_encode($new_payline);
+    return $new_payline;
   }
 
   //return new randomly generated payline
