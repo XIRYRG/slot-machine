@@ -3,7 +3,7 @@ require_once 'Appconfig.php';
 
 try {
   $user = User::get_instance();
-  $t = new Transaction('1111111', 500100, true, $user->uid);
+  //$t = new Transaction('1111111', 500100, true, $user->uid);
   
   $bitcoin_client_instance = MyBitcoinClient::get_instance();
   if ($bitcoin_client_instance->can_connect()) {

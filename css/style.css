@@ -263,6 +263,11 @@ div#slots-status-display {
 div#interesting_facts, div#statistic{
   position: relative;
   margin: 0 auto;
-  width: 400px;
+  width: 340px;
   top: 100px;
+}
+div#transactions, div#prev_and_next{
+  position: relative;
+  margin: 0 auto;
+  width: 340px;
 }

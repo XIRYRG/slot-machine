@@ -79,7 +79,8 @@ class Slot {
       self::$slot->reels[0] = self::$slot->reel1;
       self::$slot->reels[1] = self::$slot->reel2;
       self::$slot->reels[2] = self::$slot->reel3;
-      self::$slot->power_on = true;
+      self::$slot->playing = 'on';
+      self::$slot->paying_out = 'on';
       return self::$slot;
     }
     return self::$slot;
@@ -88,7 +89,7 @@ class Slot {
   protected $last_payline;//, $reels = array(3);
   public $reel1,$reel2,$reel3, $reels;
   public $currentBet, $currentUserBalance, $lastBet, $state;
-  public $power_on;// = true;
+  public $playing, $paying_out;// = true;
   
 
   //validate client's bet 
@@ -123,34 +124,108 @@ class Slot {
     }
     return true;
   }
-  public function power_switch($power){
+  public function save_options_in_db(){
+    $db = DBconfig::get_instance();
+    $res = $db->query("UPDATE slot_options SET 
+        `option_value` = '$this->playing'
+        WHERE `option_name` = 'playing'
+      ");
+    if (!$res) {
+      return FALSE;
+    }
+    $res = $db->query("UPDATE slot_options SET 
+        `option_value` = '$this->paying_out'
+        WHERE `option_name` = 'paying_out'
+      ");
+    if (!$res) {
+      return FALSE;
+    }
+    return true;
+  }
+  public function get_option_from_db(){
+    $db = DBconfig::get_instance();
+    $options['playing'] = $db->mysql_fetch_array("SELECT option_value FROM slot_options WHERE option_name = 'playing' ");
+    $options['paying_out'] = $db->mysql_fetch_array("SELECT option_value FROM slot_options WHERE option_name = 'paying_out' ");
+    $this->playing = $options['playing']['option_value'];
+    $this->paying_out = $options['paying_out']['option_value'];
+    return true;
+  }
+
+  public function get_option($option_name){
+    if ($option_name != 'playing' && $option_name != 'paying_out'){
+      return false;
+    }
+    $this->get_option_from_db();
+    switch ($option_name) {
+      case 'paying_out':
+        return $this->paying_out;
+        break;
+      case 'playing':
+        return $this->playing;
+        break;
+      default:
+        return false;
+        break;
+    }
+  }
+          
+  public function set_option($option_name, $option_value){
     if (!$_SESSION['admin']){
       return false;
     }
-    switch ($power) {
-      case 'on':
-        $this->power_on = true;
+    switch ($option_name) {
+      case 'paying_out':
+        switch ($option_value) {
+          case 'on':
+            $this->paying_out = 'on';
+            break;
+          case 'off':
+            $this->paying_out = 'off';
+            break;
+          default:
+            $this->paying_out = 'on';
+            break;
+        }
         break;
-      case 'off':
-        $this->power_on = false;
+      case 'playing':
+        switch ($option_value) {
+          case 'on':
+            $this->playing = 'on';
+            break;
+          case 'off':
+            $this->playing = 'off';
+            break;
+          default:
+            $this->playing = 'on';
+            break;
+        }
         break;
       default:
-        $this->power_on = true;
         break;
     }
-    return $power;
+    
+    if ($this->save_options_in_db()){
+      return $option_value;
+    }
+    else{
+      return false;
+    }
+    
   }
 
   //make spin
   public function spin($bet_from_client){
-    if ($this->power_on === false){
-      echo 'Slot-machine powered off. Please wait';
-      return false;
+    $this->get_option_from_db();
+    if ($this->playing === 'off'){
+      //echo 'Slot-machine powered off';
+      //return 'Slot-machine powered off';
+      return -1;
     }
     //todo: limit the number of spins for the same uid (e.g.: 1 spin per 6 second
     if (!$this->is_valid_bet($bet_from_client)){
-      echo '[Bet <= 0 or Bet not number.]';
-      return false;
+      //echo '[Bet <= 0 or Bet not number.]';
+      //return '[Bet <= 0 or Bet not number.]';
+      return -2;
     }
     /*
     //already started

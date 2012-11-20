@@ -54,24 +54,27 @@ class Transaction {
     }
   }
 
-  public static function show_transactions($option = 'last', $number = 20, $from_date = '2012-11-01', $to_date = '2022-11-01') {
+  public static function show_transactions($option = 'last', $startNum = 0, $endNum = 20, $from_date = '2012-11-01', $to_date = '2052-11-01') {
     $from_date = mysql_real_escape_string($from_date);
     $to_date = mysql_real_escape_string($to_date);
-    $number = mysql_real_escape_string($number);
+    $startNum = mysql_real_escape_string($startNum);
+    $endNum = mysql_real_escape_string($endNum);
     $db = DBconfig::get_instance();
     //$t = new Transaction();
     //show last 20 by time
     if ($option == 'last') {
-      $query = 'SELECT * FROM transactions ORDER BY `transaction_time` DESC LIMIT  0, '.$number;
+      $query = 'SELECT * FROM transactions ORDER BY `transaction_date` DESC ,  `transaction_time` DESC  LIMIT  '.$startNum .','.$endNum;
     }
-    //
-    if ($option == 'biggestwinners') {
-      $query = 'SELECT * FROM transactions WHERE `deposit` = 0 ORDER BY `money_amount` DESC LIMIT  0, '.$number;
+    elseif ($option == 'biggestwinners') {
+      $query = 'SELECT * FROM transactions WHERE `deposit` = 0 ORDER BY `money_amount` DESC LIMIT   '.$startNum .','.$endNum;
     }
-    if ($option == 'admin'){
-      $query = "SELECT * FROM transactions WHERE transaction_date BETWEEN '$from_date' AND '$to_date' ORDER BY transaction_date DESC LIMIT  0, $number";
+    elseif ($option == 'transactions'){
+      $query = "SELECT * FROM transactions WHERE transaction_date BETWEEN '$from_date' AND '$to_date' ORDER BY `transaction_date` DESC ,  `transaction_time` DESC  LIMIT  $startNum , $endNum";
     }
-    
+    else{
+      return false;
+    }
+    //dump_it($query);
     $output = '<div id="transactions"><table border="1px" style="border-collapse: collapse;">';//start stats table
     //$transactions = $db->mysql_fetch_array($query);
     $res = $db->query($query);
@@ -82,45 +85,88 @@ class Transaction {
     
     $output .= 
         '<tr>
-          <td>Transaction date</td>
           <td>Transaction time</td>
-        <td>Money(Deposit/Withdraw)</td>
-        <td>Transaction ID</td>
-        </tr>
+        <td>Money</td>
+        <td>Transaction ID</td>';
+    if (!empty($_SESSION['admin'])){
+      $output .= '<td>UID</td>';
+    }
+        $output .= '</tr>
       ';
     
     while ($transactions = $db->mysql_fetch_array_by_result($res)) {
       if ($transactions['deposit']) {
-        $color = '#E2001A';
+        $money_column = '<td style="color:#E2001A;">Deposit: '.$transactions['money_amount'].' </td>';
+        //$color = '#E2001A';
       }
       else {
-        $color = '#25803C';
+        //$color = '#25803C';
+        $money_column = '<td style="color:#25803C;">Withdrawn: '.$transactions['money_amount'].' </td>';
       }
       
       $output .= 
         '<tr>
-          <td>' . $transactions['transaction_date'] . '</td>
-          <td>' . $transactions['transaction_time'] . '</td>
-        <td style="color:' . $color . ';">' . $transactions['money_amount'] . '</td>
-        <td><a href="http://blockchain.info/search?search='.$transactions['transaction_id'].'">' . substr($transactions['transaction_id'], 0, 9) . '</a></td>
-          </tr>
+          <td>' . $transactions['transaction_date'] . ' ' . $transactions['transaction_time'] . '</td>'
+        . $money_column .
+        '<td><a href="http://blockchain.info/search?search='.$transactions['transaction_id'].'">' . substr($transactions['transaction_id'], 0, 9) . '</a></td>';
+      if (!empty($_SESSION['admin'])){
+        $output .= '<td>' . $transactions['uid'] . '</td>';
+      }
+      $output .= '</tr>
       ';
     }
      
     $output .= '</table></div>';//end
     echo $output;
   }
+  public static function show_cach_in_out_profit_payback_table($from_date, $to_date){
+    $from_date = mysql_real_escape_string($from_date);
+    $to_date = mysql_real_escape_string($to_date);
+    $total_cached_out = Transaction::get_total_cached_out_money($from_date, $to_date);
+    $total_cached_in = Transaction::get_total_cached_in_money($from_date, $to_date);
+    
+    $payback = ($total_cached_out/$total_cached_in)*100;
+    $profit = $total_cached_in - $total_cached_out;
+    $output_start = "
+        <br />
+        <table border=\"1px\" style=\"border-collapse: collapse;\">
+          <tr>
+            <td>Cash in</td>
+            <td>Cash out</td>
+            <td>Profit</td>
+            <td>Payback %</td>
+            ";
+    $output_end = "
+          </tr>
+          <tr>
+              <td>$total_cached_in</td>
+              <td>$total_cached_out</td>
+              <td>$profit</td>
+              <td>$payback</td>
+            </tr>
+        </table>
+      ";
+    echo $output_start.$output_end;
+  }
+
   //just gives a total of all the money cashed out, sums up all the withdraw transactions
-  public static function get_total_cached_out_money(){
+  public static function get_total_cached_out_money($from_date = '2012-11-01', $to_date = '2052-11-01'){
+    $from_date = mysql_real_escape_string($from_date);
+    $to_date = mysql_real_escape_string($to_date);
+    
     $db = DBconfig::get_instance();
-    $query = 'SELECT SUM(money_amount) FROM transactions WHERE `deposit` = 0';
+    $query = "SELECT SUM(money_amount) FROM transactions WHERE `deposit` = 0  AND `transaction_date` BETWEEN '$from_date' AND '$to_date'";
     $total_cached_out = $db->mysql_fetch_array($query);
+//    dump_it($query);
     return $total_cached_out[0];
   }
-  public static function get_total_cached_in_money(){
+  public static function get_total_cached_in_money($from_date = '2012-11-01', $to_date = '2052-11-01'){
+    $from_date = mysql_real_escape_string($from_date);
+    $to_date = mysql_real_escape_string($to_date);
     $db = DBconfig::get_instance();
-    $query = 'SELECT SUM(money_amount) FROM transactions WHERE `deposit` = 1';
+    $query = "SELECT SUM(money_amount) FROM transactions WHERE `deposit` = 1 AND `transaction_date` BETWEEN '$from_date' AND '$to_date'";
     $total_cached_in = $db->mysql_fetch_array($query);
+//    dump_it($query);
     return $total_cached_in[0];
   }
   public static function stats(){

@@ -74,20 +74,52 @@ catch (Exception $e){
       }
       this.statusDisplay = {
         slot : this,
-        show : function(){
+        show : function(str){
           //if (slot.currentPayline.multiplier > 0){
           if (slot.isWin()){
             $('div#slots-status-display').text('You have WON! ('+slot.currentPayline.multiplier+'x'+slot.currentPayline.bet_from_client+')');
             slot.audio.win.play();
           }
-          else{
+          else if(!slot.isWin){
             $('div#slots-status-display').text('');
             slot.audio.loose.play();
           }
+          else{
+            $('div#slots-status-display').text(str);
+          }
+          
         },
         clear : function(){
           $('div#slots-status-display').text('');
         }
+      };
+      this.options = {
+          'playing': 'on',
+          'paying_out': 'on'
+        };
+      this.checkSlotOptions = function(){
+        $.post("AjaxRequestsProcessing.php", { slot: "power", power: 'check_options'})
+        .success(function(options) {
+          console.log(options);
+          options = eval( "("+options+")");
+          slot.options.playing = options.playing;
+          slot.options.paying_out = options.paying_out;
+          if ((slot.options.playing == 'off') && (slot.options.paying_out == 'off')){
+            slot.statusDisplay.show('Playing and paying out are off');
+          }
+          else if (slot.options.playing == 'off'){
+            slot.statusDisplay.show('Slot machine playing is off');
+          }
+          else if (slot.options.paying_out == 'off'){
+            slot.statusDisplay.show('Slot machine paying out is off');
+          }
+          else{
+            slot.statusDisplay.show('');
+          }
+        })
+        .error(function(){
+          console.log('Client error. Error in ajax admin-->power request, bad response');
+        });
       };
       this.updateInterestingFacts = function(){
         $.post("AjaxRequestsProcessing.php", { slot: "getInterestingFacts"})
@@ -120,18 +152,26 @@ catch (Exception $e){
           //todo: try/catch and in case bad request 
         //})
         .success(function(paylineReturnedByServerSpin) {
-          if (paylineReturnedByServerSpin == '[Bet <= 0 or Bet not number.]'){
+          //if (paylineReturnedByServerSpin == 'Slot-machine powered off'){
+          if (paylineReturnedByServerSpin == -1){
+            slot.options.playing = 'off';
+            //console.log('Slot-machine powered off');
+            slot.statusDisplay.show('Slot machine is off');
             return false;
           }
-          console.log(paylineReturnedByServerSpin);
+          //if (paylineReturnedByServerSpin == '[Bet <= 0 or Bet not number.]'){
+          if (paylineReturnedByServerSpin == -2){
+            slot.statusDisplay.show('Bad bet');
+            return false;
+          }
           slot.currentPayline = eval( "("+paylineReturnedByServerSpin+")");
           slot.fillPayLine();
           slot.rememberLastShowedSymbols();
+          console.log(paylineReturnedByServerSpin);
         })
         .error(function(){
           console.log('Client error. Error in ajax spin request, bad response');
-        })
-        ;
+        });
       }
       this.symbols = {
         'pyramid': 0,
@@ -300,13 +340,14 @@ catch (Exception $e){
         //already started
         if (slot.state == 'started'){
           console.log('[Slot started already. Wait while it have stoped! ]');
-          return;
+          return false;
         }
         //no bet
         if (slot.currentBet <= 0){
           console.log('[Current bet = 0. Not worth the trouble]');
-          return;
+          return false;
         }
+
         slot.audio.spin5sec.play();
         slot.statusDisplay.clear();
         //restore last showed symbols if there is last show exists
@@ -456,6 +497,9 @@ catch (Exception $e){
       slot.syncWithServer();
       slot.initAudio();
       $('button#slots-spin').on('click', function(){
+        if (slot.options.playing == 'off'){
+          return false;
+        }
         if (slot.spin()){
           slot.audio.spinbutton.play();
           //slot.audio.spin5sec.play();//into spin()
@@ -533,6 +577,10 @@ catch (Exception $e){
       });
       $('button#slots-cashout').on('click', function(){
         slot.audio.buttons.play();
+        slot.checkSlotOptions();
+        if (slot.options.paying_out == 'off'){
+          return false;
+        }
         
       });
       
@@ -540,7 +588,8 @@ catch (Exception $e){
       
       //uncomment
       //setInterval(slot.updateInterestingFacts, 10000);
-      
+      //too many requests to server db
+      //setInterval(slot.checkSlotOptions, 1000);
       
       //setInterval(slot.checkForNewIncommingPayment, 10000);
     });
@@ -586,10 +635,10 @@ catch (Exception $e){
     <?php
       echo 'Last 20 transactions: <br />';
       Transaction::show_transactions($option = 'last');
-      echo '<a href="">Full list</a><br /><br />';
+      echo '<a href="fullList.php?option=last">Full list</a><br /><br />';
       echo '20 biggest winners: <br />';
       Transaction::show_transactions($option = 'biggestwinners');
-      echo '<a href="">Full list</a><br />';
+      echo '<a href="fullList.php?option=biggestwinners">Full list</a><br />';
     ?>
   </div>
   <div id="interesting_facts">

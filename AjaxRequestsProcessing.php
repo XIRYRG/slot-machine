@@ -69,34 +69,58 @@ switch ($post_request) {
       echo 'You are not logged as admin';
       return false;
     }
-    if (!empty($_POST['power']) && $_POST['power'] == 'checkPower'){
-      echo $slot->power_on;
-      return true;
-    }
-    if (empty($_POST['power']) || ($_POST['power'] != 'on' && $_POST['power'] != 'off')){
-      echo $_POST['power'];
+    if (empty($_POST['power'])){
       return false;
     }
-    
-    if ($res = $slot->power_switch($_POST['power'])){
-      echo $res;  
-      //echo 'Slot '. $_POST['power'];
+    if ($_POST['power'] == 'check_options'){
+      $options['playing'] = $slot->get_option('playing');
+      $options['paying_out'] = $slot->get_option('paying_out');
+      echo json_encode($options);
+      return true;
+    }
+    if (
+            empty($_POST['paying_out']) || 
+            ($_POST['power'] != 'on' && $_POST['power'] != 'off') || 
+            ($_POST['paying_out'] != 'on' && $_POST['paying_out'] != 'off')
+       )
+    {
+      echo $_POST['power'].' '.$_POST['paying_out'];
+      return false;
+    }
+    $options['playing'] = $slot->set_option('playing', $_POST['power']);
+    $options['paying_out'] = $slot->set_option('paying_out', $_POST['paying_out']);
+    if (!$options['playing'] || !$options['paying_out']){
+      echo 'Nothing';
     }
     else{
-      echo 'Nothing';
+      echo json_encode($options);
+      
+      //echo $res;
     }
     break;
     case 'transactions':
-      if (!$_SESSION['admin']){
-        echo 'You are not logged as admin';
-        return false;
-      }
-      if (!empty($_POST['fromDate']) && !empty($_POST['toDate'])){
+//      if (!$_SESSION['admin']){
+//        echo 'You are not logged as admin';
+//        return false;
+//      }
+      $table = 'Wrong params';
+      //between from and to dates
+      if (!empty($_POST['fromDate']) && !empty($_POST['toDate'])){// && !empty($_POST['option'])){
+        //$option = mysql_real_escape_string($_POST['option']);
         $fromDate = mysql_real_escape_string($_POST['fromDate']);
         $toDate = mysql_real_escape_string($_POST['toDate']);
-        $table = Transaction::show_transactions('admin', 10, $fromDate, $toDate);
-        echo $table;
+        $table = Transaction::show_transactions('transactions',0, 20, $fromDate, $toDate);
+        if (!empty($_POST['page']) && $_POST['page'] == 'admin'){
+          $table .= Transaction::show_cach_in_out_profit_payback_table($fromDate, $toDate);
+        }
       }
+      if (!empty($_POST['to']) && !empty($_POST['option'])){
+        $option = mysql_real_escape_string($_POST['option']);
+        $from = mysql_real_escape_string($_POST['from']);
+        $to = mysql_real_escape_string($_POST['to']);
+        $table = Transaction::show_transactions($option, $from, $to);
+      }
+      echo $table;
       break;
   default:
     break;
