@@ -53,29 +53,33 @@ class Transaction {
       return TRUE;
     }
   }
-
-  public static function show_transactions($option = 'last', $startNum = 0, $endNum = 20, $from_date = '2012-11-01', $to_date = '2052-11-01') {
+  //endNum == 0 --> no limit
+  public static function show_transactions($option = 'last', $startNum = 0, $endNum = 20, $from_date = '2012-11-01', $to_date = '2052-11-01', $fromPage = 'index') {
     $from_date = mysql_real_escape_string($from_date);
     $to_date = mysql_real_escape_string($to_date);
     $startNum = mysql_real_escape_string($startNum);
     $endNum = mysql_real_escape_string($endNum);
+    $limit = "LIMIT  $startNum , $endNum";
+    if ($endNum == 0)
+      $limit = ' ';
+    $fromPage = mysql_real_escape_string($fromPage);;
     $db = DBconfig::get_instance();
     //$t = new Transaction();
     //show last 20 by time
     if ($option == 'last') {
-      $query = 'SELECT * FROM transactions ORDER BY `transaction_date` DESC ,  `transaction_time` DESC  LIMIT  '.$startNum .','.$endNum;
+      $query = 'SELECT * FROM transactions ORDER BY `transaction_date` DESC ,  `transaction_time` DESC  '.$limit;
     }
     elseif ($option == 'biggestwinners') {
-      $query = 'SELECT * FROM transactions WHERE `deposit` = 0 ORDER BY `money_amount` DESC LIMIT   '.$startNum .','.$endNum;
+      $query = 'SELECT * FROM transactions WHERE `deposit` = 0 ORDER BY `money_amount` DESC '.$limit;
     }
     elseif ($option == 'transactions'){
-      $query = "SELECT * FROM transactions WHERE transaction_date BETWEEN '$from_date' AND '$to_date' ORDER BY `transaction_date` DESC ,  `transaction_time` DESC  LIMIT  $startNum , $endNum";
+      $query = "SELECT * FROM transactions WHERE transaction_date BETWEEN '$from_date' AND '$to_date' ORDER BY `transaction_date` DESC ,  `transaction_time` DESC  ".$limit;
     }
     else{
       return false;
     }
     //dump_it($query);
-    $output = '<div id="transactions"><table border="1px" style="border-collapse: collapse;">';//start stats table
+    $output = '<div id="transactions"><table border="2px" style="border-collapse: collapse; border-color: white; width: 340px;">';//start stats table
     //$transactions = $db->mysql_fetch_array($query);
     $res = $db->query($query);
     
@@ -88,7 +92,7 @@ class Transaction {
           <td>Transaction time</td>
         <td>Money</td>
         <td>Transaction ID</td>';
-    if (!empty($_SESSION['admin'])){
+    if (!empty($_SESSION['admin']) && $fromPage == 'admin' &&  $_SESSION['admin'] == 'true'){
       $output .= '<td>UID</td>';
     }
         $output .= '</tr>
@@ -109,7 +113,7 @@ class Transaction {
           <td>' . $transactions['transaction_date'] . ' ' . $transactions['transaction_time'] . '</td>'
         . $money_column .
         '<td><a href="http://blockchain.info/search?search='.$transactions['transaction_id'].'">' . substr($transactions['transaction_id'], 0, 9) . '</a></td>';
-      if (!empty($_SESSION['admin'])){
+      if (!empty($_SESSION['admin']) && $fromPage == 'admin' &&  $_SESSION['admin'] == 'true'){
         $output .= '<td>' . $transactions['uid'] . '</td>';
       }
       $output .= '</tr>
@@ -119,13 +123,75 @@ class Transaction {
     $output .= '</table></div>';//end
     echo $output;
   }
+  public static function show_grouped_by_user($from_date, $to_date){
+    $from_date = mysql_real_escape_string($from_date);
+    $to_date = mysql_real_escape_string($to_date);
+    $db = DBconfig::get_instance();
+    $query = "
+      SELECT t.uid, deposited_table.deposited, withdrawn_table.withdrawn
+      FROM 
+      transactions t
+      LEFT JOIN ( 
+        SELECT d1.uid, sum(d1.money_amount) deposited, d1.deposit  
+        FROM transactions as d1 
+        WHERE 
+          d1.deposit = 1 AND 
+          d1.transaction_date BETWEEN '$from_date' AND '$to_date'
+        GROUP BY d1.uid ) as deposited_table
+      ON deposited_table.uid = t.uid
+      LEFT JOIN ( 
+        SELECT d0.uid, sum(d0.money_amount) withdrawn, d0.deposit  
+        FROM transactions as d0 
+        WHERE 
+          d0.deposit = 0 AND 
+          d0.transaction_date BETWEEN '$from_date' AND '$to_date'
+          GROUP BY d0.uid ) as withdrawn_table
+      ON withdrawn_table.uid = t.uid
+      WHERE t.transaction_date BETWEEN '$from_date' AND '$to_date'
+      GROUP BY t.uid 
+      ORDER BY t.id 
+    ";
+    $output = "
+        <br />
+        <table border=\"1px\" style=\"border-collapse: collapse;\">
+          <tr>
+            <td>Grouped by UID</td>
+            <td>Total deposited</td>
+            <td>Total withdrawn</td>
+          </tr>
+            ";
+    $res = $db->query($query);
+    while ($transactions_grouped_by_user = $db->mysql_fetch_array_by_result($res)){
+      foreach ($transactions_grouped_by_user as $key => $value) {
+        if ($value == NULL){
+          $transactions_grouped_by_user[$key] = '0';
+        }
+      }
+//      dump_it($transactions_grouped_by_user);
+      $output .= 
+            '<tr>
+              <td>'.$transactions_grouped_by_user['uid'].'</td>
+              <td>'.$transactions_grouped_by_user['deposited'].'</td>
+              <td>'.$transactions_grouped_by_user['withdrawn'].'</td>
+            </tr>';
+    }
+    $output .= '</table>';
+    return $output;
+  }
+
   public static function show_cach_in_out_profit_payback_table($from_date, $to_date){
     $from_date = mysql_real_escape_string($from_date);
     $to_date = mysql_real_escape_string($to_date);
     $total_cached_out = Transaction::get_total_cached_out_money($from_date, $to_date);
     $total_cached_in = Transaction::get_total_cached_in_money($from_date, $to_date);
-    
-    $payback = ($total_cached_out/$total_cached_in)*100;
+    if ($total_cached_in != 0){
+      $payback = ($total_cached_out/$total_cached_in)*100;
+      $payback = round($payback, 2);
+    }
+    else{
+      $total_cached_in = 0;
+      $payback = 100;
+    }
     $profit = $total_cached_in - $total_cached_out;
     $output_start = "
         <br />
@@ -157,7 +223,9 @@ class Transaction {
     $db = DBconfig::get_instance();
     $query = "SELECT SUM(money_amount) FROM transactions WHERE `deposit` = 0  AND `transaction_date` BETWEEN '$from_date' AND '$to_date'";
     $total_cached_out = $db->mysql_fetch_array($query);
-//    dump_it($query);
+    if (!$total_cached_out[0]){
+      return 0;
+    }
     return $total_cached_out[0];
   }
   public static function get_total_cached_in_money($from_date = '2012-11-01', $to_date = '2052-11-01'){
@@ -166,7 +234,9 @@ class Transaction {
     $db = DBconfig::get_instance();
     $query = "SELECT SUM(money_amount) FROM transactions WHERE `deposit` = 1 AND `transaction_date` BETWEEN '$from_date' AND '$to_date'";
     $total_cached_in = $db->mysql_fetch_array($query);
-//    dump_it($query);
+    if (!$total_cached_in[0]){
+      return 0;
+    }
     return $total_cached_in[0];
   }
   public static function stats(){

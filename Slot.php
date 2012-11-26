@@ -34,7 +34,7 @@ class Slot {
       //common account for all money in slot
       self::$bitcoin_account_name = 'SlotBank';
       //uncomment
-      /*
+      
       $bitcoin_client_instance = MyBitcoinClient::get_instance();
       if ($bitcoin_client_instance->can_connect()){
         try{
@@ -45,9 +45,7 @@ class Slot {
           dump_it($e->getTraceAsString());
         }
       }
-       * 
-       * 
-       */
+
       /*
       try{
         $bitcoin_client_instance = MyBitcoinClient::get_instance();

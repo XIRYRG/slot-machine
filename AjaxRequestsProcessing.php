@@ -50,6 +50,10 @@ switch ($post_request) {
     break;
   case 'checkForIncommingPayment':
     $m = MyBitcoinClient::get_instance();
+    //incoming payments processing 
+    if ($m->getbalance($user->uid) > 0){
+      
+    }
     //$user->update_from_db();
     //$user->money_balance = $m->getbalance($user->uid);
     //$user->save_in_db();
@@ -64,11 +68,7 @@ switch ($post_request) {
     echo $json;
     break;
   case 'power':
-    //for admin only!
-    if (!$_SESSION['admin']){
-      echo 'You are not logged as admin';
-      return false;
-    }
+    
     if (empty($_POST['power'])){
       return false;
     }
@@ -87,16 +87,20 @@ switch ($post_request) {
       echo $_POST['power'].' '.$_POST['paying_out'];
       return false;
     }
-    $options['playing'] = $slot->set_option('playing', $_POST['power']);
-    $options['paying_out'] = $slot->set_option('paying_out', $_POST['paying_out']);
-    if (!$options['playing'] || !$options['paying_out']){
-      echo 'Nothing';
+    //for admin only!
+    if ($_SESSION['admin']){
+      //echo 'You are not logged as admin';
+      //return false;
+      $options['playing'] = $slot->set_option('playing', $_POST['power']);
+      $options['paying_out'] = $slot->set_option('paying_out', $_POST['paying_out']);
+      if (!$options['playing'] || !$options['paying_out']){
+        echo 'Nothing';
+      }
+      else{
+        echo json_encode($options);
+      }
     }
-    else{
-      echo json_encode($options);
-      
-      //echo $res;
-    }
+    
     break;
     case 'transactions':
 //      if (!$_SESSION['admin']){
@@ -109,9 +113,16 @@ switch ($post_request) {
         //$option = mysql_real_escape_string($_POST['option']);
         $fromDate = mysql_real_escape_string($_POST['fromDate']);
         $toDate = mysql_real_escape_string($_POST['toDate']);
-        $table = Transaction::show_transactions('transactions',0, 20, $fromDate, $toDate);
+        //if request from admin page
         if (!empty($_POST['page']) && $_POST['page'] == 'admin'){
+          $table = Transaction::show_transactions('transactions',0, 0, $fromDate, $toDate, 'admin');
+          $table .= Transaction::show_grouped_by_user($fromDate, $toDate);
           $table .= Transaction::show_cach_in_out_profit_payback_table($fromDate, $toDate);
+          
+        }
+        //if request from other page
+        else{
+          $table = Transaction::show_transactions('transactions',0, 0, $fromDate, $toDate);
         }
       }
       if (!empty($_POST['to']) && !empty($_POST['option'])){

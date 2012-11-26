@@ -15,7 +15,86 @@ require_once 'Appconfig.php';
     <script src="js/jquery.min.js"></script>
     <script src="bootstrap/js/bootstrap.min.js"></script>
     <script src="js/jquery-ui.js"></script>
-    <script type="text/javascript">
+    
+</head>
+<body>
+
+<?php
+//admin auth
+  function auth(){
+    if (empty($_POST['login']) || empty($_POST['password'])){
+      //echo 'Bad parameters was recieved. No auth';
+      exit('Not authorized');
+    }
+    $login = $_POST['login'];
+    $password_md5 = md5($_POST['password']);
+    $db = DBconfig::get_instance();
+    $admin = $db->mysql_fetch_array('SELECT * FROM admin');
+    //auth == false
+    if (($admin['login'] != $login) || ($admin['password'] != $password_md5)){
+      exit('Wrong login or password');
+      return false;
+    }
+    //auth == true
+    $_SESSION['admin'] = true;
+  }
+  //for changing login and pass in db
+  function update_login_pass_in_db(){
+    
+  }
+
+
+  if (empty($_SESSION['admin']) || $_SESSION['admin'] != 'true'){
+?>
+  
+  <div id="auth_form" style="  margin: 0 auto;    width: 200px;">
+    <form method="POST" action="admin.php">
+      Login:<br />
+      <input type="text" id="login" name="login" />
+      <br />
+      Password:<br />
+      <input type="password" id="password" name="password" />
+      <br />
+      <input type="submit" id="enter" name="enter" value="Sign in" />
+    </form>
+  </div>
+  
+<?php
+
+  auth();
+  //update_login_pass_in_db();
+}
+
+?>
+  
+  
+  <div id="slot_power_state">Playing status: on</div>
+  Slot on: <input id="power" checked="checked" type="checkbox" name="power" />
+  
+  <div id="slot_paying_out_state">Paying out status: on</div>
+  Paying out on: <input id="paying_out" checked="checked" type="checkbox" name="paying_out" />
+  <br />
+  <button id="save_slot_state">Save</button>
+  <br />
+  <br />
+  <div id="calendar">
+    <label for="from">From (e.g.: 2012-12-31)</label>
+    <input type="text" id="from" name="from" />
+    <label for="to">to</label>
+    <input type="text" id="to" name="to" />
+    <!--<br />-->
+    <button id="show_transactions">Show</button>
+  </div>
+  <div id="transactions">
+    <!--
+    tables are loaded via ajax and placed in this div
+    -->
+  </div>
+  
+  <div id="group_by_user">
+  </div>
+  
+  <script type="text/javascript">
       function slotOptions(){
         this.options = {
           'playing': 'on',
@@ -115,34 +194,7 @@ require_once 'Appconfig.php';
             $('input#paying_out').removeAttr('checked', 'checked');
           }
         }
-        /*
-        function checkSlotPowerStatus(){
-            $.post("AjaxRequestsProcessing.php", { slot: "power", power: 'check_options'})
-            .success(function(options) {
-              options = eval( "("+options+")");
-              $('div#slot_power_state').text('Playing status: '+options.playing);
-              $('div#slot_paying_out_state').text('Paying out status: '+options.paying_out);
-              if (options.playing == 'on'){
-                $('input#power').attr('checked', 'checked');
-              }
-              else{
-                $('input#power').removeAttr('checked', 'checked');
-              }
-              if (options.paying_out == 'on'){
-                $('input#paying_out').attr('checked', 'checked');
-              }
-              else{
-                $('input#paying_out').removeAttr('checked', 'checked');
-              }
-              
-              console.log(options);
-              
-            })
-            .error(function(){
-              console.log('Client error. Error in ajax admin-->power request, bad response');
-            });
-        };
-        */
+        
         function show(){
           var fromDate = $('div#calendar > input#from').val();
           var toDate = $('div#calendar > input#to').val();
@@ -162,84 +214,22 @@ require_once 'Appconfig.php';
               console.log('Client error. Error in ajax admin-->show request, bad response');
             });
         }
+        //not used
+        function auth(){
+          $('div#auth_form > input#enter').on('click',function(){
+            login = '';
+            password = '';
+            $.post("admin.php", { admin: "auth", 'login': login, 'password': password})
+              .success(function(authResponse) {
+                console.log(authResponse);
+              })
+              .error(function(){
+                console.log('Client error. Error in ajax admin-->auth_form request, bad response');
+              });
+
+          });
+        }
       });
-//      $('input#power').on('change',function(){
-//        alert('changed');
-//      });
-      
     </script>
-</head>
-<body>
-  <div id="slot_power_state">Playing status: on</div>
-  Slot on: <input id="power" checked="checked" type="checkbox" name="power" />
-  
-  <div id="slot_paying_out_state">Paying out status: on</div>
-  Paying out on: <input id="paying_out" checked="checked" type="checkbox" name="paying_out" />
-  <br />
-  <button id="save_slot_state">Save</button>
-  <br />
-  <br />
-  <div id="calendar">
-    <label for="from">From (e.g.: 2012-12-31)</label>
-    <input type="text" id="from" name="from" />
-    <label for="to">to</label>
-    <input type="text" id="to" name="to" />
-    <!--<br />-->
-    <button id="show_transactions">Show</button>
-  </div>
-  <div id="transactions">
-    <!--
-    tables are loaded via ajax and placed in this div
-    -->
-  </div>
-  
-  <div id="group_by_user">
-    group_by_user
-  </div>
 </body>
 </html>
-<?php
-/*
- * 5. ADMIN 
-- Minimal backend where cash in, cash out and profit can be outputted 
- * by selectable time frame and breakdown of per user winnings/losse
-Also number for the current payback % and option to turn off the playing and paying out
- * 
- *
- */
-  //$user = User::get_instance();
-
-
-
-$_SESSION['admin'] = true;
-//dump_it($_SESSION);
-
-//todo: total cach in out
-//$total_cached_out = Transaction::get_total_cached_out_money();
-//$total_cached_in = Transaction::get_total_cached_in_money();
-//
-//Transaction::show_transactions('transactions', 0,20, '2012-11-19', '2012-11-23');
-//$output_start = "
-//    <br />
-//    <table border=\"1px\" style=\"border-collapse: collapse;\">
-//      <tr>
-//        <td>Cash in</td>
-//        <td>Cash out</td>
-//        <td>Profit</td>
-//        <td>Payback %</td>
-//         
-//        ";
-//$payback = ($total_cached_out/$total_cached_in)*100;
-//$profit = $total_cached_in - $total_cached_out;
-//$output_end = "
-//      </tr>
-//      <tr>
-//          <td>$total_cached_in</td>
-//          <td>$total_cached_out</td>
-//          <td>$profit</td>
-//          <td>$payback</td>
-//        </tr>
-//    </table>
-//  ";
-//echo $output_start.$output_end;
-?>

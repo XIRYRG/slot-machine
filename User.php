@@ -104,7 +104,7 @@ class User {
     $this->money_balance = 10250;
     //uncomment
     //create the new wallet for new user
-    /*
+    
     $bitcoin_client_instance = MyBitcoinClient::get_instance();
     //no connection with bitcoin server
     if ($bitcoin_client_instance->can_connect()){
@@ -119,8 +119,7 @@ class User {
         //can't set cookie because of this error echo
       }
     }
-     * 
-     */
+
     $this->user_wallet = 'No_yet';
     $this->affiliateusername = 'Nobody';
     $this->remote_user_address = $remote_user_address;
