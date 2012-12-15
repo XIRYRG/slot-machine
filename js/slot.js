@@ -1,4 +1,5 @@
 function Slot(uid){
+      var slot = this;
       //todo: get config for slot (on client side) via Ajax Or use default config described here
       //default slot config
       this.uid = uid;
@@ -46,14 +47,14 @@ function Slot(uid){
         }
       }
       this.initAudio = function(){
-        var slot = this;
+        //var slot = this;
         slot.audio.spin5sec = document.getElementById('spin5sec');
         slot.audio.win = document.getElementById('win');
         slot.audio.loose = document.getElementById('loose');
         slot.audio.spinbutton = document.getElementById('spinbutton');
         slot.audio.buttons.element = document.getElementById('buttons');
       }
-      this.isWin = function(){
+      function isWin(){
         if (slot.currentPayline.multiplier > 0){
           return true;
         }
@@ -61,22 +62,20 @@ function Slot(uid){
           return false;
         }
       }
+      this.winChecker = function(){
+        if (isWin()){
+          $('div#slots-status-display').text('You WON '+ slot.currentPayline.multiplier*slot.currentPayline.bet_from_client +' (Bet '+slot.currentPayline.bet_from_client+'x'+slot.currentPayline.multiplier+')');
+          slot.audio.win.play();
+        }
+        if(!isWin() && slot.currentPayline.bet_from_client){//slot.currentPayline.bet_from_client != 'undefined'
+          $('div#slots-status-display').text('You lost '+ slot.currentPayline.bet_from_client +'. Better luck on the next spin!');
+          slot.audio.loose.play();
+        }
+      }
       this.statusDisplay = {
-        slot : this,
+        //slot : this,
         show : function(str){
-          //if (slot.currentPayline.multiplier > 0){
-          if (slot.isWin()){
-            $('div#slots-status-display').text('You WON '+ slot.currentPayline.multiplier*slot.currentPayline.bet_from_client +' (Bet '+slot.currentPayline.bet_from_client+'x'+slot.currentPayline.multiplier+')');
-            slot.audio.win.play();
-          }
-          else if(!slot.isWin() && slot.currentPayline.bet_from_client){//slot.currentPayline.bet_from_client != 'undefined'
-            $('div#slots-status-display').text('You lost '+ slot.currentPayline.bet_from_client +'. Better luck on the next spin!');
-            slot.audio.loose.play();
-          }
-          else{
-            $('div#slots-status-display').text(str);
-          }
-          
+          $('div#slots-status-display').text(str);
         },
         clear : function(){
           $('div#slots-status-display').text('');
@@ -89,7 +88,7 @@ function Slot(uid){
       this.checkSlotOptions = function(){
         $.post("AjaxRequestsProcessing.php", { slot: "power", power: 'check_options'})
         .success(function(options) {
-          console.log(options);
+          if (window.console) console.log(options);
           options = eval( "("+options+")");
           slot.options.playing = options.playing;
           slot.options.paying_out = options.paying_out;
@@ -107,7 +106,8 @@ function Slot(uid){
           }
         })
         .error(function(){
-          console.log('Client error. Error in ajax admin-->power request, bad response');
+          if (window.console) console.log('Client error. Error in ajax admin-->power request, bad response');
+          slot.statusDisplay.show('Connection error.');
         });
       };
       this.updateInterestingFacts = function(){
@@ -116,27 +116,29 @@ function Slot(uid){
           var interestingFacts = eval( "("+interestingFacts+")");
           $('td#total_cached_out').text('Cashed out money: '+ interestingFacts.cashed_out_money +' BTC');
           $('td#total_spin_number').text('Games played: '+ interestingFacts.games_played);
-          //console.log(interestingFacts);
+          //if (window.console) console.log(interestingFacts);
         })
         .error(function(){
-          console.log('Client error. Error in ajax updateInterestingFacts request, bad response');
+          if (window.console) console.log('Client error. Error in ajax updateInterestingFacts request, bad response');
+          slot.statusDisplay.show('Connection error.');
         });
       }
       this.checkForNewIncommingPayment = function(){
         $.post("AjaxRequestsProcessing.php", { slot: "checkForIncommingPayment"})
           //todo: try/catch and in case bad request 
         .success(function(balance) {
-          console.log(balance);
+          if (window.console) console.log(balance);
           slot.syncWithServer();
           //slot.currentPayline = eval( "("+balance+")");
         })
         .error(function(){
-          console.log('Client error. Error in ajax checkForIncommingPayment request, bad response');
+          if (window.console) console.log('Client error. Error in ajax checkForIncommingPayment request, bad response');
+          slot.statusDisplay.show('Connection error.');
         })
         ;
       }
       this.sendToServerThatSpinPressed = function(){
-        var slot = this;
+        //var slot = this;
         $.post("AjaxRequestsProcessing.php", { slot: "spinPressed", currentBet: slot.currentBet })//, function(paylineReturnedByServerSpin){
           //todo: try/catch and in case bad request 
         //})
@@ -144,7 +146,7 @@ function Slot(uid){
           //if (paylineReturnedByServerSpin == 'Slot-machine powered off'){
           if (paylineReturnedByServerSpin == -1){
             slot.options.playing = 'off';
-            //console.log('Slot-machine powered off');
+            //if (window.console) console.log('Slot-machine powered off');
             slot.statusDisplay.show('Slot machine is off');
             return false;
           }
@@ -156,10 +158,12 @@ function Slot(uid){
           slot.currentPayline = eval( "("+paylineReturnedByServerSpin+")");
           slot.fillPayLine();
           slot.rememberLastShowedSymbols();
-          console.log(paylineReturnedByServerSpin);
+          if (window.console) console.log('-----------');
+          if (window.console) console.log(paylineReturnedByServerSpin);
         })
         .error(function(){
-          console.log('Client error. Error in ajax spin request, bad response');
+          if (window.console) console.log('Client error. Error in ajax spin request, bad response');
+          slot.statusDisplay.show('Connection error.');
         });
       }
       this.symbols = {
@@ -172,7 +176,7 @@ function Slot(uid){
         'blank': 6
       }
       this.syncWithServer = function(){
-        var slot = this;
+        //var slot = this;
         user = null;
         $.post("AjaxRequestsProcessing.php", { slot: "sync" }, function(slotValues){
           user = eval( "("+slotValues+")");
@@ -183,7 +187,7 @@ function Slot(uid){
           //slot.currentUserBalance = user_balance;
           //slotValues
         });
-        console.log(user);
+        if (window.console) console.log(user);
         
         
         //todo: sync all values 
@@ -216,7 +220,7 @@ function Slot(uid){
       
       //fill line (top/center/bottom) in slot
       this.fillLine = function(symbol){
-        var slot = this;
+        //var slot = this;
         /*
         if (!(typeof(reelNum) == 'number') || reelNum < 1 || reelNum > 3 ){
           return false;
@@ -226,7 +230,7 @@ function Slot(uid){
       }
       //There is no spoon
       this.restoreLastShowedSymbols = function(){
-        var slot = this;
+        //var slot = this;
         $('div#slots-reel1 > div.slots-line > div.oldpayline').prev().attr('class', 'slots-symbol'+slot.lastShowedSymbols.reel1.top);
         $('div#slots-reel1 > div.slots-line > div.oldpayline').attr('class', 'slots-symbol'+slot.lastShowedSymbols.reel1.center+' oldpayline');
         $('div#slots-reel1 > div.slots-line > div.oldpayline').next().attr('class', 'slots-symbol'+slot.lastShowedSymbols.reel1.bottom);
@@ -242,7 +246,7 @@ function Slot(uid){
       
       //remember who you are
       this.rememberLastShowedSymbols = function(){
-        var slot = this;
+        //var slot = this;
         slot.lastShowedSymbols.reel1.top = slot.arrayOfSymbolsId[0][0];
         slot.lastShowedSymbols.reel1.center = slot.getValidSymbolByName(slot.currentPayline.sym1);
         slot.lastShowedSymbols.reel1.bottom = slot.arrayOfSymbolsId[0][2];
@@ -260,7 +264,7 @@ function Slot(uid){
       }
       //fills lines of symbols
       this.linesFilling = function(){
-        var slot = this;
+        //var slot = this;
         
         //linesFilling should be called after filling slot.currentPayline (== Ajax-request for spin| == on the server spin completed)
         /*if (!slot.currentPayline){
@@ -325,15 +329,15 @@ function Slot(uid){
       }
       //make 1 spin
       this.spin = function(){
-        var slot = this;
+        //var slot = this;
         //already started
         if (slot.state == 'started'){
-          console.log('[Slot started already. Wait while it have stoped! ]');
+          if (window.console) console.log('[Slot started already. Wait while it have stoped! ]');
           return false;
         }
         //no bet
         if (slot.currentBet <= 0){
-          console.log('[Current bet = 0. Not worth the trouble]');
+          if (window.console) console.log('[Current bet = 0. Not worth the trouble]');
           return false;
         }
         //restore last showed symbols if there is last show exists
@@ -366,20 +370,15 @@ function Slot(uid){
         //sync the result with the server
         setTimeout('slot.syncWithServer()', slot.maxSpinTime-200);
         //set last bet as current bet after spin
-        //
-        //if (slot.currentBet == 0){
-        //setTimeout('slot.setBetTo(slot.getLastBet())', slot.maxSpinTime+200);
         setTimeout('slot.setLastBetByDefault()', slot.maxSpinTime+200);
-        //
-        //}
         setTimeout('slot.statusDisplay.show()', slot.maxSpinTime+100);
         //check for win
-        //setTimeout('slot.isWin()',slot.maxSpinTime+100);
+        setTimeout('slot.winChecker()', slot.maxSpinTime+100);
         slot.onceStarted = true;
         return true;
       }
       this.animateSlot = function(){
-        var slot = this;
+        //var slot = this;
         $('div.slots-line').each(function(){
           $(this).css({marginTop: -(slot.symbolsPerReel-3)*125 + 'px'});
         });
@@ -391,10 +390,10 @@ function Slot(uid){
       this.incBetTo = function(val){
         val = Number(val);
         val = Math.round(val*100) / 100;
-        //console.log(val);
+        //if (window.console) console.log(val);
         //can't inc bet
         if (this.currentUserBalance - val < 0){
-          console.log("[can't inc bet]");
+          if (window.console) console.log("[can't inc bet]");
           return false;
         }
         
@@ -408,7 +407,7 @@ function Slot(uid){
         val = Number(val);
         val = Math.round(val*100) / 100;
         if (this.currentBet - val < 0){
-          console.log("[can't dec bet]");
+          if (window.console) console.log("[can't dec bet]");
           return false;
         }
         this.currentUserBalance += val;
@@ -430,7 +429,7 @@ function Slot(uid){
         }
         //val should be < currentUserBalance
         if (this.currentUserBalance + this.currentBet - val < 0){
-          console.log("[Not enough money. Max bet had been made.]");
+          if (window.console) console.log("[Not enough money. Max bet had been made.]");
           val = this.getMaxBet();
           //return 0;
         }
@@ -447,7 +446,7 @@ function Slot(uid){
       }
       //retfresh values on page
       this.updateBalanceAndBet = function(){
-        var slot = this;
+        //var slot = this;
         this.currentUserBalance = Math.round(this.currentUserBalance * 100) / 100;
         this.currentBet = Math.round(this.currentBet * 100) / 100;
         $('div#slots-balance').text(slot.currentUserBalance);
@@ -456,22 +455,28 @@ function Slot(uid){
 
       //return max bet and fill current bet field
       this.getMaxBet = function(){
-        var slot = this;
+        //var slot = this;
         return slot.currentUserBalance + slot.currentBet;
       }
       this.makeMaxBet = function(){
-        var slot = this;
+        //var slot = this;
         var maxBet = slot.getMaxBet();
         this.setBetTo(maxBet);
       }
       this.getLastBet = function(){
         if (this.lastBet == 0){
-          console.log('[There is no last bet]');
+          if (window.console) console.log('[There is no last bet]');
           return 0;
         }
-        var slot = this;
+        //var slot = this;
         return slot.lastBet;
       }
       
     }
+    
+//    onsole.log('some msg');
+//    console.info('information');
+//    console.warn('some warning');
+//    console.error('some error');
+//    console.assert(false, 'YOU FAIL');
     

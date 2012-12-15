@@ -11,7 +11,7 @@ class Transaction {
 
   private $transaction_date, $transaction_time, $money_amount, $transaction_id, $deposit, $uid;
 
-  public function __construct($transaction_id = '', $money_amount = 0, $deposit = false, $uid) {
+  public function __construct($transaction_id = '', $money_amount = 0, $deposit = false, $uid = 0) {
     $this->transaction_id = $transaction_id;
     $this->money_amount = $money_amount;
     $this->deposit = $deposit; //deposit == 1|true -> deposit money / deposit == 0|false -> withdraw
@@ -54,7 +54,7 @@ class Transaction {
     }
   }
   //endNum == 0 --> no limit
-  public static function show_transactions($option = 'last', $startNum = 0, $endNum = 20, $from_date = '2012-11-01', $to_date = '2052-11-01', $fromPage = 'index') {
+  public static function show_transactions($option = 'last', $startNum = 0, $endNum = 20, $from_date = '2012-11-01', $to_date = '2052-11-01', $from_page = 'index') {
     $from_date = mysql_real_escape_string($from_date);
     $to_date = mysql_real_escape_string($to_date);
     $startNum = mysql_real_escape_string($startNum);
@@ -62,7 +62,7 @@ class Transaction {
     $limit = "LIMIT  $startNum , $endNum";
     if ($endNum == 0)
       $limit = ' ';
-    $fromPage = mysql_real_escape_string($fromPage);;
+    $from_page = mysql_real_escape_string($from_page);;
     $db = DBconfig::get_instance();
     //$t = new Transaction();
     //show last 20 by time
@@ -78,8 +78,12 @@ class Transaction {
     else{
       return false;
     }
+    $table_width = 340;
+    if ($from_page == 'admin'){
+      $table_width = 700;
+    }
     //dump_it($query);
-    $output = '<div id="transactions"><table border="2px" style="border-collapse: collapse; border-color: white; width: 340px;">';//start stats table
+    $output = '<div id="transactions"><table border="2px" style="border-style: dashed; border-collapse: collapse; border-color: white; width: '.$table_width.'px;">';//start stats table
     //$transactions = $db->mysql_fetch_array($query);
     $res = $db->query($query);
     
@@ -92,7 +96,7 @@ class Transaction {
           <td>Transaction time</td>
         <td>Money</td>
         <td>Transaction ID</td>';
-    if (!empty($_SESSION['admin']) && $fromPage == 'admin' &&  $_SESSION['admin'] == 'true'){
+    if (!empty($_SESSION['admin']) && $from_page == 'admin' &&  $_SESSION['admin'] == 'true'){
       $output .= '<td>UID</td>';
     }
         $output .= '</tr>
@@ -113,7 +117,7 @@ class Transaction {
           <td>' . $transactions['transaction_date'] . ' ' . $transactions['transaction_time'] . '</td>'
         . $money_column .
         '<td><a href="http://blockchain.info/search?search='.$transactions['transaction_id'].'">' . substr($transactions['transaction_id'], 0, 9) . '</a></td>';
-      if (!empty($_SESSION['admin']) && $fromPage == 'admin' &&  $_SESSION['admin'] == 'true'){
+      if (!empty($_SESSION['admin']) && $from_page == 'admin' &&  $_SESSION['admin'] == 'true'){
         $output .= '<td>' . $transactions['uid'] . '</td>';
       }
       $output .= '</tr>
@@ -158,6 +162,7 @@ class Transaction {
             <td>Grouped by UID</td>
             <td>Total deposited</td>
             <td>Total withdrawn</td>
+            <td>Total deposited - withdrawn</td>
           </tr>
             ";
     $res = $db->query($query);
@@ -168,11 +173,13 @@ class Transaction {
         }
       }
 //      dump_it($transactions_grouped_by_user);
+      $dif = $transactions_grouped_by_user['deposited'] - $transactions_grouped_by_user['withdrawn'];
       $output .= 
             '<tr>
               <td>'.$transactions_grouped_by_user['uid'].'</td>
               <td>'.$transactions_grouped_by_user['deposited'].'</td>
               <td>'.$transactions_grouped_by_user['withdrawn'].'</td>
+              <td>'.$dif.'</td>
             </tr>';
     }
     $output .= '</table>';

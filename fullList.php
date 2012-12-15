@@ -18,12 +18,12 @@ require_once 'Appconfig.php';
       /*
       $.post("AjaxRequestsProcessing.php", { slot: "power", power: power_on_off, paying_out: paying_out})
       .success(function(options) {
-        console.log(options);
+        if (window.console) console.log(options);
         options = eval( "("+options+")");
         checkSlotPowerStatus();
       })
       .error(function(){
-        console.log('Client error. Error in ajax admin-->power request, bad response');
+        if (window.console) console.log('Client error. Error in ajax admin-->power request, bad response');
       });
       */
       function getParams(){
@@ -50,11 +50,11 @@ require_once 'Appconfig.php';
         $.post("AjaxRequestsProcessing.php", { slot: "transactions", 'option': option, 'from': (currentPage*100-100), 'to': (currentPage*100)})
           .success(function(transactionsTable) {
             $('div#transactions').html(transactionsTable);
-            //console.log(transactionsTable);
+            //if (window.console) console.log(transactionsTable);
 
           })
           .error(function(){
-            console.log('Client error. Error in ajax admin-->show request, bad response');
+            if (window.console) console.log('Client error. Error in ajax admin-->show request, bad response');
           });
       }
       $('div#left').on('click',function(){

@@ -33,6 +33,10 @@ class Slot {
       self::$user = $user;
       //common account for all money in slot
       self::$bitcoin_account_name = 'SlotBank';
+      
+
+
+
       //uncomment
       
       $bitcoin_client_instance = MyBitcoinClient::get_instance();
@@ -45,7 +49,12 @@ class Slot {
           dump_it($e->getTraceAsString());
         }
       }
+      
 
+      
+      
+      
+      
       /*
       try{
         $bitcoin_client_instance = MyBitcoinClient::get_instance();
@@ -225,19 +234,6 @@ class Slot {
       //return '[Bet <= 0 or Bet not number.]';
       return -2;
     }
-    /*
-    //already started
-    if ($this->state == 'started'){
-      //console.log('[Slot started already. Wait while it have stoped! ]');
-      echo '[Slot started already. Wait while it have stoped! ]';
-      return false;
-    }
-    //slot started
-    //$this->getStateStarted();
-    $this->state = 'started';
-    //$this->getStateStop();
-    $this->state = 'stop';
-    */
     $this->currentBet = $bet_from_client;
     //bet was 
     $this->lastBet = $this->currentBet;

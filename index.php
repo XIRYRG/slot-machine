@@ -62,7 +62,7 @@ catch (Exception $e){
           //slot.audio.spin5sec.play();
           //setInterval(function(){
           slot.intervalID = setInterval(function(){
-            console.log('autoplay');
+            if (window.console) console.log('autoplay');
             if (slot.currentUserBalance + slot.currentBet <= 0){
               slot.autoplay = false;
             }
@@ -128,12 +128,10 @@ catch (Exception $e){
       });
       
       
-      
       //uncomment
       //setInterval(slot.updateInterestingFacts, 10000);
       //too many requests to server db
       //setInterval(slot.checkSlotOptions, 1000);
-      
       //setInterval(slot.checkForNewIncommingPayment, 10000);
     });
   </script>  

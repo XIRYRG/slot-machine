@@ -1,20 +1,38 @@
 <?php
-
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 /**
  * Description of appconfig
  *
  * @author vadim24816
  */
 
+if ($_SERVER['HTTP_HOST'] == 'bitbandit.eu'){
+  AppConfig::$domainname = '.bitbandit.eu';
+}
+elseif ($_SERVER['HTTP_HOST'] == '109.174.40.94'){
+  AppConfig::$domainname = '109.174.40.94';
+}
+elseif ($_SERVER['HTTP_HOST'] == 'localhost'){
+  AppConfig::$domainname = 'localhost';
+}
+elseif ($_SERVER['HTTP_HOST'] == '127.0.0.1') {
+  AppConfig::$domainname = '127.0.0.1';
+}
+
 //must be first!
-ini_set('session.gc_maxlifetime', AppConfig::now_plus_one_year());
-ini_set('session.cookie_lifetime', AppConfig::now_plus_one_year());
+ini_set('session.gc_maxlifetime', AppConfig::now_plus_x_years());
+ini_set('session.cookie_lifetime', AppConfig::now_plus_x_years());
 //ini_set('session.save_path', $_SERVER['DOCUMENT_ROOT'] .'/slot-machine1/sessions');
+//set session via https
+session_set_cookie_params( 
+    AppConfig::now_plus_x_years(), 
+    '/', //path
+    AppConfig::$domainname,//current domain
+    //'',//any
+    //'.bitbandit.eu', //cant work on local
+    true, //secure
+    false //http only
+  ); 
+
 session_start();
 
 //relocate browser to https
@@ -37,15 +55,9 @@ require_once 'Transaction.php';
 require_once 'functions.php';
 //Cookies should be enabled
 class AppConfig{
-  /*
-  public function __construct() {
-    self::filling();
-  }
-   * 
-   */
-  //public static $NOW_PLUS_ONE_YEAR;
-  public static function now_plus_one_year(){
-    return time()+60*60*24*366;
+  public static $domainname = 'bitbandit.eu';
+  public static function now_plus_x_years($x = 10){
+    return time()+60*60*24*366*$x;
   }
 }
 ?>

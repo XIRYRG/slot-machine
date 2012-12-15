@@ -58,6 +58,8 @@ class User {
           throw new Exception('User hadn\'t found in database. Please clear cookies in your browser');
         }
         catch (Exception $e){
+          //$this->reg();
+          //stack trace show FULL INFO about bitcoin, with login and passwords
           dump_it($e->getTraceAsString());
         }
       }
@@ -102,6 +104,11 @@ class User {
       $this->uid = sha1(uniqid(""));
     }
     $this->money_balance = 10250;
+    
+    
+    
+    
+    
     //uncomment
     //create the new wallet for new user
     
@@ -120,6 +127,9 @@ class User {
       }
     }
 
+        
+    
+    
     $this->user_wallet = 'No_yet';
     $this->affiliateusername = 'Nobody';
     $this->remote_user_address = $remote_user_address;
@@ -133,12 +143,17 @@ class User {
         echo 'file: '.$file;
         echo 'line: '.$line;
       }
-      SetCookie("uid",  $this->uid, AppConfig::now_plus_one_year(), '/');
+      SetCookie("uid", $this->uid, AppConfig::now_plus_x_years(), '/', /*'.bitbandit.eu'*/AppConfig::$domainname, true, false);
       //todo: set it when user have sent money to slot
-      SetCookie("user_wallet",  $this->user_wallet, AppConfig::now_plus_one_year(), '/');
+      SetCookie("user_wallet",  $this->user_wallet, AppConfig::now_plus_x_years(), '/', /*'.bitbandit.eu'*/AppConfig::$domainname, true, false);
       return true;
     }
     else {
+      //throw new Exception('Failed to add to the database.');
+      echo 'Failed to add to the database.';
+//      catch (Exception $e) {
+//        dump_it($e->getTraceAsString());
+//      }
       return false;
     }
   }
@@ -189,7 +204,8 @@ class User {
     if (!$this->is_user_exist($this->uid)){
       $res = $db->query( "INSERT INTO users (uid, bitcoin_recieve_address, user_wallet, money_balance, affiliateusername, created_at, remote_user_address) 
         VALUES ('$this->uid', '$this->bitcoin_recieve_address', '$this->user_wallet', '$this->money_balance', '$this->affiliateusername', NOW(), '$this->remote_user_address')");//NOW() == '$this->created_at',
-      
+//      echo "INSERT INTO users (uid, bitcoin_recieve_address, user_wallet, money_balance, affiliateusername, created_at, remote_user_address) 
+//        VALUES ('$this->uid', '$this->bitcoin_recieve_address', '$this->user_wallet', '$this->money_balance', '$this->affiliateusername', NOW(), '$this->remote_user_address')";
     }
     //if user exists already just update record
     else {
@@ -203,7 +219,16 @@ class User {
         WHERE `uid` = '$this->uid'
       ");
     }
+//    echo "UPDATE users SET 
+//        `bitcoin_recieve_address` = '$this->bitcoin_recieve_address',
+//        `user_wallet` = '$this->user_wallet',
+//        `money_balance` = '$this->money_balance',
+//        `affiliateusername` = '$this->affiliateusername',
+//        `remote_user_address` = '$this->remote_user_address'
+//        WHERE `uid` = '$this->uid'
+//      ";
     if (!$res){
+      //echo 'no res';
       return FALSE;
     }
     //update user after saving

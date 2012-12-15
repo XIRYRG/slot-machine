@@ -50,15 +50,24 @@ switch ($post_request) {
     break;
   case 'checkForIncommingPayment':
     $m = MyBitcoinClient::get_instance();
+    //no incoming payments was made
+    if ($m->getbalance($user->uid) <= 0){
+      echo 0;
+      return false;
+    }
     //incoming payments processing 
     if ($m->getbalance($user->uid) > 0){
+      //all money user have sent
+      $user->money_balance = $m->getbalance($user->uid);
+      //move money was sent by user to common slot account
+      $m->move($user->uid, Slot::$bitcoin_account_name/*'SlotBank'*/, $user->money_balance, 0,'Move from the user account '.$user->uid.' to the common slot bitcoin account'.Slot::$bitcoin_account_name.' Money: '.$user->money_balance);
       
+      $user->save_in_db();
+      $json = $user->money_balance;
+      echo $json;
     }
     //$user->update_from_db();
-    //$user->money_balance = $m->getbalance($user->uid);
-    //$user->save_in_db();
-    $json = $user->money_balance;
-    echo $json;
+    
     break;
   //todo: checking if the same user makes requests too often
   case 'getInterestingFacts':

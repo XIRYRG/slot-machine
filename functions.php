@@ -6,7 +6,7 @@ function show_interesting_facts() {
   $total_spin_number = $slot->get_total_spin_number();
   $output = "
     <br />
-    <table border=\"2px\" style=\"border-collapse: collapse; border-color: white;\">
+    <table border='2px' style='border-style: dashed; border-collapse: collapse; border-color: white; width:340px'>
       <tr>
         <td id='total_cached_out'>Cashed out money: $total_cached_out BTC</td>
         <td id='total_spin_number'>Games played: $total_spin_number </td>
