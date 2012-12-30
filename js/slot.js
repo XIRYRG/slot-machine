@@ -13,6 +13,25 @@ function Slot(uid){
       this.arrayOfSymbolsId = new Array();
       this.onceFilledLine = false;
       this.onceStarted = false;
+      this.bitcoinCheckConnectionInterval = 30000;//in ms == 30sec
+      this.isBitcoinConnected = function(){
+        $.post("AjaxRequestsProcessing.php", { slot: "bitcoin_connect"})
+        .success(function(isConnected) {
+          //slot.statusDisplay.clear();
+          if (window.console) console.log('Bitcoind isConnected: '+isConnected);
+          if (isConnected == 0){
+            slot.statusDisplay.show('No connection with bitcoin server. Please, try later.', 14);
+            return false;
+          }
+          if (isConnected == 1  /*&& slot.statusDisplay.get() === 'No connection with bitcoin server. Please, try later.'*/){
+            slot.statusDisplay.clear();
+            return true;
+          }
+        })
+        .error(function(){
+          if (window.console) console.log('Bad request in isBitcoinConnected function');
+        })
+      }
       this.musicOn = true;
       //this.audio = new Audio();
       //
@@ -43,7 +62,17 @@ function Slot(uid){
         isWarmup : true,
         count : 10,
         dec : function(){
-          this.count -= 1;
+          if (this.count > 0)
+            this.count -= 1;
+          //if (this.count < 0)
+          else
+            this.isWarmup = false;
+        },
+        couldWin : function(){
+          return "YOU could have WON "+slot.currentPayline.multiplier+" times your bet.\n Please feed me some bitcoins! :)";
+        },
+        couldntWin : function(){
+          return "You lost nothing. Let's try for real now? :)";
         }
       }
       this.initAudio = function(){
@@ -63,18 +92,53 @@ function Slot(uid){
         }
       }
       this.winChecker = function(){
-        if (isWin()){
-          $('div#slots-status-display').text('You WON '+ slot.currentPayline.multiplier*slot.currentPayline.bet_from_client +' (Bet '+slot.currentPayline.bet_from_client+'x'+slot.currentPayline.multiplier+')');
-          slot.audio.win.play();
+        //in case of warmup - just first 10 times
+        if (slot.warmup.isWarmup){
+          //if win
+          if (isWin()){
+            slot.statusDisplay.show(slot.warmup.couldWin(), 13);
+          }
+          //if lose
+          if (!isWin()){
+            slot.statusDisplay.show(slot.warmup.couldntWin());
+          }
         }
-        if(!isWin() && slot.currentPayline.bet_from_client){//slot.currentPayline.bet_from_client != 'undefined'
-          $('div#slots-status-display').text('You lost '+ slot.currentPayline.bet_from_client +'. Better luck on the next spin!');
-          slot.audio.loose.play();
+        //normal mode
+        else {
+          if (isWin()){
+            slot.statusDisplay.show('You WON '+ slot.currentPayline.multiplier*slot.currentPayline.bet_from_client +' (Bet '+slot.currentPayline.bet_from_client+'x'+slot.currentPayline.multiplier+')');
+            //$('div#slots-status-display').text('You WON '+ slot.currentPayline.multiplier*slot.currentPayline.bet_from_client +' (Bet '+slot.currentPayline.bet_from_client+'x'+slot.currentPayline.multiplier+')');
+            slot.audio.win.play();
+          }
+          if(!isWin() && slot.currentPayline.bet_from_client){//slot.currentPayline.bet_from_client != 'undefined'
+            slot.statusDisplay.show('You lost '+ slot.currentPayline.bet_from_client +'. Better luck on the next spin!');
+            //$('div#slots-status-display').text('You lost '+ slot.currentPayline.bet_from_client +'. Better luck on the next spin!');
+            slot.audio.loose.play();
+          }
         }
       }
       this.statusDisplay = {
         //slot : this,
+        get : function(){
+          return $('div#slots-status-display').text();
+        },
         show : function(str){
+          //default font size
+          var fontSize = 17;
+          //if other font size given
+          if (arguments.length == 2){
+            //if given as string
+            if (typeof arguments[1] == 'string'){
+              fontSize = parseInt(arguments[1]);
+            }
+            if (typeof arguments[1] == 'number'){
+              fontSize = arguments[1];
+            }
+          }
+          else{
+            fontSize = 17;
+          }
+          $('div#slots-status-display').css('font-size', fontSize);
           $('div#slots-status-display').text(str);
         },
         clear : function(){
@@ -143,6 +207,8 @@ function Slot(uid){
           //todo: try/catch and in case bad request 
         //})
         .success(function(paylineReturnedByServerSpin) {
+          //when result (new payline, user win/lose) was received, client sync with server
+          slot.syncWithServer();
           //if (paylineReturnedByServerSpin == 'Slot-machine powered off'){
           if (paylineReturnedByServerSpin == -1){
             slot.options.playing = 'off';
@@ -158,7 +224,11 @@ function Slot(uid){
           slot.currentPayline = eval( "("+paylineReturnedByServerSpin+")");
           slot.fillPayLine();
           slot.rememberLastShowedSymbols();
-          if (window.console) console.log('-----------');
+          //if client have made bet than he stars to play with real money
+          if (slot.currentPayline.bet_from_client > 0){
+            slot.warmup.isWarmup = false;
+          }
+          if (window.console) console.log('-----Got New Payline------');
           if (window.console) console.log(paylineReturnedByServerSpin);
         })
         .error(function(){
@@ -182,7 +252,7 @@ function Slot(uid){
           user = eval( "("+slotValues+")");
           slot.uid = user.uid;
           slot.currentUserBalance = new Number(user.money_balance - slot.currentBet);
-          slot.updateBalanceAndBet();
+          setTimeout('slot.updateBalanceAndBet();', slot.maxSpinTime-100);
           //todo: try/catch and in case bad request 
           //slot.currentUserBalance = user_balance;
           //slotValues
@@ -309,6 +379,7 @@ function Slot(uid){
         //slot.onceFilledLine = true;
         //slot.rememberLastShowedSymbols();
       }
+      //todo: rotate until result spin response got
       this.rotationTime = {
         //rotation time for every reel in ms
         reel1: 2000,
@@ -336,10 +407,14 @@ function Slot(uid){
           return false;
         }
         //no bet
-        if (slot.currentBet <= 0){
+        if (slot.currentBet <= 0 && (slot.warmup.isWarmup == false || slot.warmup.count == 0)){
+          //slot.statusDisplay.show('Please, make a bet');
+          slot.statusDisplay.clear();
           if (window.console) console.log('[Current bet = 0. Not worth the trouble]');
           return false;
         }
+        // -1 bet
+        slot.warmup.dec();
         //restore last showed symbols if there is last show exists
         slot.linesFilling();
         if (slot.onceStarted){
@@ -368,9 +443,9 @@ function Slot(uid){
         slot.animateSlot();
         
         //sync the result with the server
-        setTimeout('slot.syncWithServer()', slot.maxSpinTime-200);
+        //setTimeout('slot.syncWithServer()', 0/*slot.maxSpinTime-1000*/);
         //set last bet as current bet after spin
-        setTimeout('slot.setLastBetByDefault()', slot.maxSpinTime+200);
+        setTimeout('slot.setLastBetByDefault()', slot.maxSpinTime+500);
         setTimeout('slot.statusDisplay.show()', slot.maxSpinTime+100);
         //check for win
         setTimeout('slot.winChecker()', slot.maxSpinTime+100);

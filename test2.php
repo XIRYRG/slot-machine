@@ -44,16 +44,5 @@ $user->user_wallet = $raw_transaction_arr['vout'][1]['scriptPubKey']['addresses'
 
 echo $user->user_wallet;
 
-//$b->query('decoderawtransaction '.$raw_txid);
 
-//$db = DBconfig::get_instance();
-/*
-$res = $db->query("SELECT * FROM users ORDER BY created_at");
-while($row = $db->mysql_fetch_array_by_result($res)){
-  dump_it($row);
-}
-dump_it($res);
-dump_it($user);
- * 
- */
 ?>

@@ -37,7 +37,7 @@ class Transaction {
   public function get_from_db($transaction_id) {
     $transaction_id = mysql_real_escape_string($transaction_id);
     $db = DBconfig::get_instance();
-    $transaction = $db->mysql_fetch_array('SELECT * FROM transactions WHERE transaction_id = \'' . $transaction_id . '\'');
+    $transaction = $db->mysqli_fetch_array('SELECT * FROM transactions WHERE transaction_id = \'' . $transaction_id . '\'');
     //if there is no user with given uid
     if ($transaction == FALSE) {
       return FALSE;
@@ -102,7 +102,7 @@ class Transaction {
         $output .= '</tr>
       ';
     
-    while ($transactions = $db->mysql_fetch_array_by_result($res)) {
+    while ($transactions = $db->mysqli_fetch_array_by_result($res)) {
       if ($transactions['deposit']) {
         $money_column = '<td style="color:#E2001A;">Deposit: '.$transactions['money_amount'].' </td>';
         //$color = '#E2001A';
@@ -166,7 +166,7 @@ class Transaction {
           </tr>
             ";
     $res = $db->query($query);
-    while ($transactions_grouped_by_user = $db->mysql_fetch_array_by_result($res)){
+    while ($transactions_grouped_by_user = $db->mysqli_fetch_array_by_result($res)){
       foreach ($transactions_grouped_by_user as $key => $value) {
         if ($value == NULL){
           $transactions_grouped_by_user[$key] = '0';
@@ -229,7 +229,7 @@ class Transaction {
     
     $db = DBconfig::get_instance();
     $query = "SELECT SUM(money_amount) FROM transactions WHERE `deposit` = 0  AND `transaction_date` BETWEEN '$from_date' AND '$to_date'";
-    $total_cached_out = $db->mysql_fetch_array($query);
+    $total_cached_out = $db->mysqli_fetch_array($query);
     if (!$total_cached_out[0]){
       return 0;
     }
@@ -240,7 +240,7 @@ class Transaction {
     $to_date = mysql_real_escape_string($to_date);
     $db = DBconfig::get_instance();
     $query = "SELECT SUM(money_amount) FROM transactions WHERE `deposit` = 1 AND `transaction_date` BETWEEN '$from_date' AND '$to_date'";
-    $total_cached_in = $db->mysql_fetch_array($query);
+    $total_cached_in = $db->mysqli_fetch_array($query);
     if (!$total_cached_in[0]){
       return 0;
     }

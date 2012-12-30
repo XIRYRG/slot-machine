@@ -1,148 +1,71 @@
 <?php
+//relocate browser to https
+//require_once 'relocateToSecureScheme.php';
+
 require_once 'Dumpit.php';
-require_once 'jsonRPCClient.php';
+require_once 'DBconfig.php';
+////require_once 'Instawallet.php';
+//require_once 'MyBitcoinClient.php';
+//require_once 'Randomizer.php';
+//require_once 'Symbol.php';
+//require_once 'Reel.php';
+//require_once 'Payline.php';
+//require_once 'Paytable.php';
+//require_once 'Cookie.php';
+require_once 'User.php';
+//require_once 'bitcoin/bitcoin.inc';
+require_once 'Slot.php';
+//require_once 'Transaction.php';
+//require_once 'functions.php';
+//Cookies should be enabled
+
+$db = DBconfig::get_instance();
 
 
-//$bitcoin = new jsonRPCClient('https://bitcoinrpc:bBvvbjBP4fSHAnLF38PeHcExtYrCgCRR6j9EL68yEPj@99.192.139.66/', true);
-//$bitcoin = new jsonRPCClient('https://bitcoinrpc:bBvvbjBP4fSHAnLF38PeHcExtYrCgCRR6j9EL68yEPj@localhost', true); 
-//  echo "<pre>\n";
-//  print_r($bitcoin->getinfo()); echo "\n";
-//  //echo 
-//  //echo "Received: ".$bitcoin->getreceivedbylabel("Your Address")."\n";
-//  echo $bitcoin->getbalance();
-//  echo "</pre>";
-//  
-//  
+//$db->close();
+//$db = DBconfig::get_instance();
+//$db->close();
+//$db = DBconfig::get_instance();
 
+//$db->close();
+//$uid = '69d37bef6ba2bb1670d20b49e5e62752391aa6b6';
+//$user = $db->mysqli_fetch_array("SELECT * FROM users WHERE uid = '$uid'");
+//dump_it($user);
 
+$user = User::get_instance();
+echo $user->uid;
+$slot = Slot::get_instance($user);
 
+$m = MyBitcoinClient::get_instance();
 
-  $bitcoin_client_instance = MyBitcoinClient::get_instance();
-  //$bitcoin_client_instance->setCaCertificate( __DIR__ .'/ca-bundle.crt' );
-if ($bitcoin_client_instance->can_connect()) {
-  echo 'Connect: can_connect <br />';
-  echo 'Full balance: '.$bitcoin_client_instance->getbalance();
-  echo '<br/>';
-  echo $bitcoin_client_instance->getinfo();
+$m->move(Slot::$bitcoin_account_name/*'SlotBank'*/, $user->uid, 0.02, 0,'Move from the user account '.$user->uid.' to the common slot bitcoin account'.Slot::$bitcoin_account_name.' Money: '.$user->money_balance);
+//no incoming payments was made
+if ($m->can_connect() !== true){
+  return false;
 }
-
-
-/*
-//$data = send_get('https://bitcoinrpc:bBvvbjBP4fSHAnLF38PeHcExtYrCgCRR6j9EL68yEPj@cs1205.mojohost.com:8332/','','bitbandit.eu');
-$data = send_post('https://bitcoinrpc:bBvvbjBP4fSHAnLF38PeHcExtYrCgCRR6j9EL68yEPj@cs1205.mojohost.com:8332/','username=bitcoinrpc&password=bBvvbjBP4fSHAnLF38PeHcExtYrCgCRR6j9EL68yEPj', '', 'bitbandit.eu');
-dump_it($data);
-*/
-
-/*
-$ch = curl_init();
-//curl_setopt ($ch, CURLOPT_URL, "https://bitcoinrpc:bBvvbjBP4fSHAnLF38PeHcExtYrCgCRR6j9EL68yEPj@cs1205.mojohost.com:8332"); 
-//curl_setopt ($ch, CURLOPT_URL, "https://cs1205.mojohost.com/");
-//curl_setopt ($ch, CURLOPT_URL, "https://bitcoinrpc:bBvvbjBP4fSHAnLF38PeHcExtYrCgCRR6j9EL68yEPj@localhost:8332");
-curl_setopt($ch, CURLOPT_URL, "https://localhost");
-curl_setopt($ch, CURLOPT_HEADER,1);
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true); 
-curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, true);
-curl_setopt($ch, CURLOPT_PORT, 8332);
-//try to use full path
-//curl_setopt($ch, CURLOPT_CAINFO, __DIR__ .'/server.cert');
-//curl_setopt($ch, CURLOPT_CAINFO, __DIR__ .'/xampp_local_server.crt');
-curl_setopt($ch, CURLOPT_CAINFO, __DIR__ .'/ca-bundle.crt');
-
-
-curl_setopt($ch, CURLOPT_VERBOSE,1);
-//curl_setopt($ch, CURLOPT_CERTINFO, true);
-curl_setopt($ch, CURLINFO_HEADER_OUT, true);
-$result = curl_exec ($ch);
-
-  $bitcoin_client_instance = MyBitcoinClient::get_instance();
-if ($bitcoin_client_instance->can_connect()) {
-  echo 'Connect: can_connect <br />';
-  echo 'Full balance: '.$bitcoin_client_instance->getbalance();
-  echo '<br/>';
-  echo $bitcoin_client_instance->getinfo();
+$bitcoin_money_balance = $m->getbalance($user->uid, 0);
+if ($bitcoin_money_balance <= 0){
+  echo 0;
+  return false;
 }
-
-
-$info = curl_getinfo($ch);
-dump_it($info);
-echo $type = curl_multi_getcontent($ch);
-
-
-
-
-curl_close ($ch); 
-echo $result;
-
-//$url = 'https://bitcoinrpc:bBvvbjBP4fSHAnLF38PeHcExtYrCgCRR6j9EL68yEPj@cs1205.mojohost.com:443';
-//$contextOptions = array(
-//    'ssl' => array(
-//        'verify_peer'   => true,
-//        'allow_self_signed' => true,
-//        'cafile'        => __DIR__ . '/server.cert',
-//        'verify_depth'  => 5
-//    //    'CN_match'      => 'secure.example.com'
-//    )
-//);
-//$sslContext = stream_context_create($contextOptions);
-//$default = stream_context_set_default($contextOptions);
-//$result = file_get_contents($url, NULL, $sslContext);
-//dump_it($result);
-//dump_it($default);
-//
-//$bitcoin = new BitcoinClient('https', 'bitcoinrpc', 'bBvvbjBP4fSHAnLF38PeHcExtYrCgCRR6j9EL68yEPj', '64.59.69.66',/*'cs1205.mojohost.com',/ '8332', 'server.cert', 2);
-//dump_it($bitcoin->getinfo());
-
-/*
-$bitcoin_client_instance = MyBitcoinClient::get_instance();
-if ($bitcoin_client_instance->can_connect()) {
-  echo 'Connect: can_connect <br />';
-  echo 'Full balance: '.$bitcoin_client_instance->getbalance();
-  echo '<br/>';
-  echo $bitcoin_client_instance->getinfo();
+//incoming payments processing 
+echo $m->getbalance($user->uid, 0);
+//all money user have sent
+$user->money_balance = $bitcoin_money_balance;
+//( txid, all money, deposit = true, uid )
+$t = new Transaction('', $user->money_balance, true, $user->uid);
+//echo Slot::$bitcoin_account_name;
+//move money was sent by user to common slot account
+try{
+  //$m->move($user->uid, Slot::$bitcoin_account_name/*'SlotBank'*/, $user->money_balance, 0,'Move from the user account '.$user->uid.' to the common slot bitcoin account'.Slot::$bitcoin_account_name.' Money: '.$user->money_balance);
+  $user->user_wallet = $user->get_user_wallet_by_uid();
+  $user->save_in_db();
 }
-
-$bitcoin = new jsonRPCClient('https://bitcoinrpc:bBvvbjBP4fSHAnLF38PeHcExtYrCgCRR6j9EL68yEPj@cs1205.mojohost.com:8332/');
-dump_it($bitcoin->getinfo());
-
-
-
-//$response="";
-////$uri = $scheme . "://" . $username . ":" . $password . "@" . $address . ":" . $port . "/";
-//if ($fp = fsockopen ("ssl://bitcoinrpc:bBvvbjBP4fSHAnLF38PeHcExtYrCgCRR6j9EL68yEPj@cs1205.mojohost.com", 443, $errno, $errstr, 30))
-//{
-//  $request ="GET / HTTP/1.0\r\n";
-//  $request.="Host: https://cs1205.mojohost.com\r\n";
-//  $request.="Content-Type: application/x-www-form-urlencoded\r\n";
-//  $request.="Content-Length: 7\r\n";
-//  $request.="\r\n\r\n";
-//  $request.="foo=bar";
-//
-//  fwrite($fp,$request,strlen($request));
-//
-//  while (!feof($fp))
-//      $response.=fread($fp,8192);
-//
-//  fclose($fp);
-//}
-//else
-//  die('Could not open socket');
-//
-//echo "<pre>\n";
-//echo htmlentities($response);
-//echo "</pre>\n";
-
-//$context = stream_context_create();
-//j
-///* Sends an http request to www.example.com
-//   with additional headers shown above */
-//$fp = fopen('https://cs1205.mojohost.com', 'r', false, $context);
-//fpassthru($fp);
-//fclose($fp);
-
-
-
-
-//$bitcoin = new jsonRPCClient('https://bitcoinrpc:bBvvbjBP4fSHAnLF38PeHcExtYrCgCRR6j9EL68yEPj@cs1205.mojohost.com:8333/');
-//dump_it($bitcoin->getinfo());
+catch (Exception $e){
+  //$this->reg();
+  //stack trace show FULL INFO about bitcoin, with login and passwords
+  dump_it($e->getTraceAsString());
+}
+$json = $user->money_balance;
+echo $json;
 ?>

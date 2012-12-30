@@ -39,7 +39,7 @@ switch ($post_request) {
     break;
   case 'spinPressed':
     //no bet
-    if (empty($_POST['currentBet'])){
+    if (!isset($_POST['currentBet'])){
       echo 'bet wasn\'t transferred';
       return false;
     }
@@ -49,26 +49,40 @@ switch ($post_request) {
     echo $json;
     break;
   case 'checkForIncommingPayment':
-    $m = MyBitcoinClient::get_instance();
-    //no incoming payments was made
-    if ($m->getbalance($user->uid) <= 0){
+//    $m = MyBitcoinClient::get_instance();
+//    //no incoming payments was made
+//    if ($m->can_connect() !== true){
+//      return false;
+//    }
+//    if ($m->getbalance($user->uid, 0) <= 0){
+//      echo 0;
+//      return false;
+//    }
+//    //incoming payments processing 
+//    if ($m->getbalance($user->uid, 0) > 0){
+//      //all money user have sent
+//      $user->money_balance = $m->getbalance($user->uid, 0);
+//      //( txid, all money, deposit = true, uid )
+//      $t = new Transaction('', $user->money_balance, true, $user->uid);
+//      //move money was sent by user to common slot account
+//      $m->move($user->uid, Slot::$bitcoin_account_name/*'SlotBank'*/, $m->getbalance($user->uid, 0), 0,'Move from the user account '.$user->uid.' to the common slot bitcoin account'.Slot::$bitcoin_account_name.' Money: '.$user->money_balance);
+//      $user->user_wallet = $user->get_user_wallet_by_uid();
+//      $user->save_in_db();
+//      $json = $user->money_balance;
+//    echo $json;
+    $cashed_in_value = $user->cash_in();
+    if ($cashed_in_value > 0){
+      echo $cashed_in_value;
+    }
+    else{
+      //no cashed in money
       echo 0;
-      return false;
     }
-    //incoming payments processing 
-    if ($m->getbalance($user->uid) > 0){
-      //all money user have sent
-      $user->money_balance = $m->getbalance($user->uid);
-      //move money was sent by user to common slot account
-      $m->move($user->uid, Slot::$bitcoin_account_name/*'SlotBank'*/, $user->money_balance, 0,'Move from the user account '.$user->uid.' to the common slot bitcoin account'.Slot::$bitcoin_account_name.' Money: '.$user->money_balance);
-      
-      $user->save_in_db();
-      $json = $user->money_balance;
-      echo $json;
-    }
-    //$user->update_from_db();
     
     break;
+    //$user->update_from_db();
+    
+    
   //todo: checking if the same user makes requests too often
   case 'getInterestingFacts':
     $cashed_out_money = Transaction::get_total_cached_out_money();
@@ -141,6 +155,15 @@ switch ($post_request) {
         $table = Transaction::show_transactions($option, $from, $to);
       }
       echo $table;
+      break;
+    case 'bitcoin_connect':
+      $b = MyBitcoinClient::get_instance();
+      if ($b->can_connect() === true){
+        echo '1';
+      }
+      else{
+        echo '0';
+      }
       break;
   default:
     break;

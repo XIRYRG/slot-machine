@@ -1,17 +1,22 @@
 <?php
 require_once 'Appconfig.php';
 
+$db = DBconfig::get_instance();
+
 try {
-  $user = User::get_instance();
-  //$t = new Transaction('1111111', 500100, true, $user->uid);
+//  $user = User::get_instance();
+//  //$t = new Transaction('1111111', 500100, true, $user->uid);
+//  
+//  $bitcoin_client_instance = MyBitcoinClient::get_instance();
+//  if ($bitcoin_client_instance->can_connect()) {
+//    echo 'Connect: can_connect <br />';
+//    echo 'Full balance: '.$bitcoin_client_instance->getbalance();
+//    echo '<br/>';
+//    //echo $bitcoin_client_instance->getinfo();
+//  }
   
-  $bitcoin_client_instance = MyBitcoinClient::get_instance();
-  if ($bitcoin_client_instance->can_connect()) {
-    echo 'Connect: can_connect <br />';
-    echo 'Full balance: '.$bitcoin_client_instance->getbalance();
-    echo '<br/>';
-    //echo $bitcoin_client_instance->getinfo();
-  }
+  
+
 //  $amount = $bitcoin_client_instance->getbalance('ultraNewWallet');
 //  dump_it($bitcoin_client_instance->getbalance('ultraNewWallet'));
 //  dump_it($bitcoin_client_instance->getbalance('SlotBank'));

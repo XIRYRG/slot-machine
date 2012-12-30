@@ -24,13 +24,13 @@ require_once 'Appconfig.php';
   function auth(){
     if (empty($_SESSION['admin']) || $_SESSION['admin'] != 'true'){
       if (empty($_POST['login']) || empty($_POST['password'])){
-        //echo 'Bad parameters was recieved. No auth';
+        //echo 'Bad parameters was received. No auth';
         exit('Not authorized');
       }
       $login = $_POST['login'];
       $password_md5 = md5($_POST['password']);
       $db = DBconfig::get_instance();
-      $admin = $db->mysql_fetch_array('SELECT * FROM admin');
+      $admin = $db->mysqli_fetch_array('SELECT * FROM admin');
       //auth == false
       if (($admin['login'] != $login) || ($admin['password'] != $password_md5)){
         exit('Wrong login or password');
@@ -49,7 +49,7 @@ require_once 'Appconfig.php';
   //for changing login and pass in db
   function update_login_pass_in_db(){
     if (empty($_POST['login']) || empty($_POST['password']) || empty($_POST['Save'])){
-        //echo 'Bad parameters was recieved. No auth';
+        //echo 'Bad parameters was received. No auth';
         //exit('Not authorized'.__LINE__);
       //echo 'login and password not given.';
       return false;

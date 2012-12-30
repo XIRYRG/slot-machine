@@ -4,7 +4,8 @@
  *
  * @author vadim24816
  */
-
+//return 0;
+//echo 'Appconfig';
 if ($_SERVER['HTTP_HOST'] == 'bitbandit.eu'){
   AppConfig::$domainname = '.bitbandit.eu';
 }
@@ -56,6 +57,7 @@ require_once 'functions.php';
 //Cookies should be enabled
 class AppConfig{
   public static $domainname = 'bitbandit.eu';
+  public static $min_confirmations_for_cash_out = '2';
   public static function now_plus_x_years($x = 10){
     return time()+60*60*24*366*$x;
   }

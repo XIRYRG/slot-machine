@@ -37,21 +37,6 @@ class Reel {
     for($i = 0; $i < $number; $i++){
       array_push($this->reel_line, $symbol);
     }
-    /*
-    echo $start_index = count($this->reel_line);
-    for( $start_index; $start_index < $start_index + $number; $start_index++ ){
-      //$this->reel_line[$start_index] = $symbol;
-      array_push($this->reel_line, $symbol);
-    }
-     * 
-     */
   }
 }
-/*
-$r = new Reel('asdf');
-dump_it($r);
-$r->filling_by_given_symbol_specifin_number_of_cells(Symbol::$anarchy, 3);
-$r->filling_by_given_symbol_specifin_number_of_cells(Symbol::$bitcoin, 4);
-dump_it($r);
-*/
 ?>

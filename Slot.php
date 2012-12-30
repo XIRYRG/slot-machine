@@ -18,7 +18,7 @@ class Slot {
   protected static $slot;
   protected static $log_every_spin;
   public static $user;
-  public static $bitcoin_account_name;
+  public static $bitcoin_account_name = 'SlotBank';
   public static $bitcoin_address;
   private function __construct(){}
   private function __clone(){} 
@@ -40,7 +40,7 @@ class Slot {
       //uncomment
       
       $bitcoin_client_instance = MyBitcoinClient::get_instance();
-      if ($bitcoin_client_instance->can_connect()){
+      if ($bitcoin_client_instance->can_connect() === true){
         try{
 
           self::$bitcoin_address = $bitcoin_client_instance->getaccountaddress(self::$bitcoin_account_name);
@@ -106,7 +106,7 @@ class Slot {
       return false;
     }
     self::$user->update_from_db();
-    if ($bet_from_client > 0 && $bet_from_client <= self::$user->money_balance){
+    if ($bet_from_client >= 0 && $bet_from_client <= self::$user->money_balance){
       return true;
     }
     else {
@@ -116,7 +116,7 @@ class Slot {
   public function get_total_spin_number(){
     $db = DBconfig::get_instance();
     $query = 'SELECT COUNT(id) FROM spins';
-    $total_spin_number = $db->mysql_fetch_array($query);
+    $total_spin_number = $db->mysqli_fetch_array($query);
     return $total_spin_number[0];
   }
   
@@ -151,8 +151,8 @@ class Slot {
   }
   public function get_option_from_db(){
     $db = DBconfig::get_instance();
-    $options['playing'] = $db->mysql_fetch_array("SELECT option_value FROM slot_options WHERE option_name = 'playing' ");
-    $options['paying_out'] = $db->mysql_fetch_array("SELECT option_value FROM slot_options WHERE option_name = 'paying_out' ");
+    $options['playing'] = $db->mysqli_fetch_array("SELECT option_value FROM slot_options WHERE option_name = 'playing' ");
+    $options['paying_out'] = $db->mysqli_fetch_array("SELECT option_value FROM slot_options WHERE option_name = 'paying_out' ");
     $this->playing = $options['playing']['option_value'];
     $this->paying_out = $options['paying_out']['option_value'];
     return true;
