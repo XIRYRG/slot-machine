@@ -1,9 +1,27 @@
 <?php
 require_once 'Appconfig.php';
 
+//function strToHex($string)
+//{
+//    $hex='';
+//    for ($i=0; $i < strlen($string); $i++)
+//    {
+//        $hex .= dechex(ord($string[$i]));
+//    }
+//    return $hex;
+//}
+
 $db = DBconfig::get_instance();
 
 try {
+//  $str[0] = 520 + 818675;
+//  $str[1] = 520 + 398568;
+//  $str[2] = 520 + 654792;
+//  $str[0] = sha1($str[0]);
+//  $str[1] = sha1($str[1]);
+//  $str[2] = sha1($str[2]);
+//  dump_it($str);
+
 //  $user = User::get_instance();
 //  //$t = new Transaction('1111111', 500100, true, $user->uid);
 //  
@@ -15,6 +33,44 @@ try {
 //    //echo $bitcoin_client_instance->getinfo();
 //  }
   
+  
+  
+//  $randomizer = Randomizer::get_instance();
+//  $seed = sha1('lCCMX5Fw3AjK89fYJ7PFFnpb3TDbdaEa1');
+//  dump_it($seed);
+//  //sscanf(crc32($seed), "%u", $unsigned_seed);
+//  $seed = crc32($seed);
+//  dump_it($seed);
+//  
+  
+  
+  
+  //$seed = hexdec($seed);
+  //dump_it($seed);
+//  $seed = base_convert($seed, 16, 36);
+//  dump_it($seed);
+//  
+//  $seed = base_convert($seed, 36, 16);
+//  dump_it($seed);
+  
+  //$seed = intval($seed, 16);
+  //dump_it($seed-1 % PHP_INT_MAX);
+//  $seed = dechex($seed);
+//  dump_it($seed);
+//  $seed = strToHex($seed);
+//  dump_it($seed);
+  
+//  $randomizer->mt_srand($seed);//reinit
+//  echo $rand_num = $randomizer->mt_rand();
+  
+  $slot = Slot::get_instance();
+  $slot->get_new_payline_and_servers_seeds(1);
+  dump_it($slot);
+  dump_it($_SESSION);
+//  echo $rand_num = $randomizer->mt_rand();
+//  echo $rand_num = $randomizer->mt_rand();
+//  dump_it(mt_getrandmax());
+  dump_it(PHP_INT_MAX);
   
 
 //  $amount = $bitcoin_client_instance->getbalance('ultraNewWallet');

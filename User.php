@@ -162,6 +162,7 @@ class User {
     try{
       $db = DBconfig::get_instance();
       $user = $db->mysqli_fetch_array('SELECT * FROM users WHERE uid = \''.$uid.'\'');
+      //$user = $db->mysqli_fetch_array('SELECT * FROM users WHERE uid = '.$uid);
     }
     catch (Exception $e){
       dump_it($e->getTraceAsString());
@@ -177,12 +178,16 @@ class User {
       $this->uid = $uid;
       $this->bitcoin_receive_address = $user['bitcoin_receive_address'];
       $this->money_balance = $user['money_balance'];
+      $this->user_wallet = $user['user_wallet'];
+      $this->remote_user_address = $user['remote_user_address'];
+      $this->affiliateusername = $user['affiliateusername'];
       return TRUE;
     }
   }
   function is_user_exist($uid){
     $db = DBconfig::get_instance();
     $user = $db->mysqli_fetch_array('SELECT * FROM users WHERE uid = \''.$uid.'\'');
+    //echo 'SELECT * FROM users WHERE uid = \''.$uid.'\'';
     //if there is no user with given uid
     if ($user == FALSE){
       //echo 'user == false';
@@ -234,16 +239,16 @@ class User {
     $this->get_from_db($this->uid);
     return true;
   }
-  public function get_user_wallet_by_uid($uid = null){
+  public function get_user_wallet_by_uid(/*$uid = null*/){
     //by default (if uid not given) return user_wallet_address for current user 
-    if ($uid === null){
-      $uid = $this->uid;
-    }
+//    if ($uid === null){
+//      $uid = $this->uid;
+//    }
     $b = MyBitcoinClient::get_instance();
     //todo: get transaction where category == receive!!!
     //$transactions_list = $b->query("listtransactions", $uid, "1", "0");
     //listtransactions, uid = $uid, count = 50, start_from = 0
-    $transactions_list = $b->query("listtransactions", $uid, "50", "0");
+    $transactions_list = $b->query("listtransactions", $this->uid, "50", "0");
     // 0, null, false
     if (!$transactions_list){
       echo 'Error. Bitcoin hasn\'t transactions for given user id';
@@ -296,61 +301,103 @@ class User {
     
     //$user_wallet_address = $raw_transaction_arr['vout'][0]['scriptPubKey']['addresses'][0];
     //dump_it($raw_transaction_arr);
-    return $user_wallet_address;
+    $address_and_txid = array('user_wallet_address' => $user_wallet_address, 'txid' => $txid);
+    //return $user_wallet_address;
+    return $address_and_txid;
   }
   
   //one function for cash_in and cash_out
-  public function cash_move($where = 'in'){
-    if ($where !== 'in' && $where !== 'out'){
+  public function cash_move($to_where = 'in'){
+    if ($to_where !== 'in' && $to_where !== 'out'){
       //little stupid
       return false;
     }
     $m = MyBitcoinClient::get_instance();
     $user = $this;
-    $user_bitcoin_money_balance = $m->getbalance($user->uid, 0);
+    //todo: todo
+//    if (account_not_exist($user->uid)){
+//      echo 0;
+//      return false;
+//    }
+    
+    //user_bitcoin_money_balance was transfered to SlotBank account, so it's null.
+    //$user_bitcoin_money_balance = $user->money_balance;
+    //$user_bitcoin_money_balance = $m->getbalance($user->uid, 0);
     if ($m->can_connect() !== true){
       return false;
     }
-    //no in/outcoming payments was made
-    if ($user_bitcoin_money_balance <= 0){
-      echo 0;
-      return false;
-    }
+    
     //payments processing 
-    if ($user_bitcoin_money_balance > 0){
-      //all money user has
-      //to be sure, get it from user's bitcoin account
-      $user->money_balance = $user_bitcoin_money_balance;
-      
-      if ($where == 'in'){
-        //( txid, all money, deposit = true, uid )
-        $t = new Transaction('', $user->money_balance, true, $user->uid);
-        //move money was sent by user to common slot account
-        $m->move($user->uid, Slot::$bitcoin_account_name/*'SlotBank'*/, $user->money_balance, 0,'Move from the user account '.$user->uid.' to the common slot bitcoin account '.Slot::$bitcoin_account_name.' Money: '.$user->money_balance);
+    //
+    //all money user has
+    //$user->money_balance = $user_bitcoin_money_balance;
+    if ($to_where == 'in'){
+      //for 'In' payments we use bitcoind(!) user balance
+      $user_bitcoin_money_balance = $m->getbalance($user->uid, 0);
+      //no in/outcoming payments was made
+      if ($user_bitcoin_money_balance <= 0){
+        return false;
+      }
+      //move money was sent by user to common slot account
+      $m->move($user->uid, Slot::$bitcoin_account_name/*'SlotBank'*/, $user_bitcoin_money_balance, 0,'Move from the user account '.$user->uid.' to the common slot bitcoin account '.Slot::$bitcoin_account_name.' Money: '.$user->money_balance);
+      //ADD (+=) new payment to user balance
+      $user->money_balance += $user_bitcoin_money_balance;
+      //find out user's bitcoin wallet address
+      $user_walllet_address_and_txid = $user->get_user_wallet_by_uid();
+      $wallet_from_which_user_sent_money = $user_walllet_address_and_txid['user_wallet_address'];
+      //find out the input transaction txid
+      $txid = $user_walllet_address_and_txid['txid'];
+      //( txid, all money, deposit = true, uid )
+      $t = new Transaction($txid, $user_bitcoin_money_balance, true, $user->uid);
+      //keep amount of money was moved for returning
+      $amont_of_money_was_moved = $user_bitcoin_money_balance;
+      //should be not 0 if money was received (there is transaction which has 'received' category)
+      if ($wallet_from_which_user_sent_money !== 0){
+        $user->user_wallet = $wallet_from_which_user_sent_money;
         
-        //find out user's bitcoin wallet address
-        $tmp_user_wallet = $user->get_user_wallet_by_uid();
-        //should be not 0 if money was received (there is transaction which has 'received' category)
-        if ($tmp_user_wallet !== 0){
-          $user->user_wallet = $tmp_user_wallet;
-        }
-        else{
-          //money was not really received 
-          return false;
-        }
+        //$user->save_in_db();
       }
-      if ($where == 'out'){
-        $t = new Transaction('', $user->money_balance, false, $user->uid);
-        //first move bitcoind from common account to user account
-        $m->move(Slot::$bitcoin_account_name/*'SlotBank'*/, $user->uid, $user->money_balance, Appconfig::$min_confirmations_for_cash_out/*2*/,'Move from the common slot bitcoin account '.Slot::$bitcoin_account_name.' to the user account '.$user->uid.' Money: '.$user->money_balance);
-        //make user money null
-        $user->money_balance = 0;
+      else{
+        //money was not really received 
+        return false;
       }
-      $user->save_in_db();
-      //$json = $user->money_balance;
-      //money was outputed
-      return $user_bitcoin_money_balance;
     }
+    if ($to_where == 'out'){
+      //nothing to out
+      if ($user->money_balance <= 0){
+        return false;
+      }
+      //first move bitcoins from common account to user account
+      //$m->move(Slot::$bitcoin_account_name/*'SlotBank'*/, $user->uid, $user->money_balance, 0/*Appconfig::$min_confirmations_for_cash_out/*2*/,'Move from the common slot bitcoin account '.Slot::$bitcoin_account_name.' to the user account '.$user->uid.' Money: '.$user->money_balance);
+      //second move bitcoins from user account to user wallet with 2(!) confirmations
+      //$txid = $m->sendfrom($user->uid, $user->user_wallet, (float)$user->money_balance, 2/*Appconfig::$min_confirmations_for_cash_out*/, 'Cash out from user account '.$user->uid.' to user wallet addres '.$user->user_wallet, 'Thank you for playing'/*AppConfig::$message_bitcoin_show_when_user_withdrawn_money*/);
+      //Send amount from the server's available balance
+      $txid = $m->sendtoaddress($user->user_wallet, $user->money_balance, 'Cash out from user account '.$user->uid.' to user wallet addres '.$user->user_wallet, 'Thank you for playing'/*AppConfig::$message_bitcoin_show_when_user_withdrawn_money*/);
+      //dump_it($txid);
+      //get amount of fee for withdrawn transaction
+      $arr = $m->gettransaction($txid);//$m->query("gettransaction", $txid);
+      
+      //fee is negative!
+      $fee = $arr['fee'];
+      //dump_it($arr);
+      //$m->move(Slot::$bitcoin_account_name/*'SlotBank'*/, $user->uid, abs($fee), 0,"Pay fee for user's transaction of  money withdrawal");
+      
+      //for 'Out' payments we use user balance from DB
+      $t = new Transaction($txid, $user->money_balance, false, $user->uid);
+      //Send amount from the server's available balance
+      //$m->sendtoaddress($user->user_wallet, $user->money_balance, 'Cash out from user account '.$user->uid.' to user wallet addres '.$user->user_wallet, 'Thank you for playing'/*AppConfig::$message_bitcoin_show_when_user_withdrawn_money*/);
+      //$m->move($user->uid, $user->user_wallet, $user->money_balance, 0/*Appconfig::$min_confirmations_for_cash_out/*2*/,'Move from the user bitcoin account '.$user->uid.' to the user wallet '.$user->user_wallet.' Money: '.$user->money_balance);
+      
+      //keep amount of money was moved for returning
+      $amont_of_money_was_moved = $user->money_balance;
+      //make user money null
+      $user->money_balance = 0;
+    }
+    //and SAVE user wallet in DB!
+    $user->save_in_db();
+    //$json = $user->money_balance;
+    //money was outputed
+    return $amont_of_money_was_moved;
   }
   //aliases
   public function cash_out(){

@@ -58,6 +58,7 @@ require_once 'functions.php';
 class AppConfig{
   public static $domainname = 'bitbandit.eu';
   public static $min_confirmations_for_cash_out = '2';
+  public static $message_bitcoin_show_when_user_withdrawn_money = 'Thank you for playing';
   public static function now_plus_x_years($x = 10){
     return time()+60*60*24*366*$x;
   }

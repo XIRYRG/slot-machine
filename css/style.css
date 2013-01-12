@@ -271,3 +271,13 @@ div#transactions, div#prev_and_next{
   margin: 0 auto;
   width: 340px;
 }
+div#verify{
+  position: absolute;
+  right: 210px;
+  top: 680px;
+  z-index: 3;
+}
+div#verify label{
+  width: 170px;
+  display: inline-block;
+}

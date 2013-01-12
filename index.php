@@ -56,6 +56,24 @@ catch (Exception $e){
       <button id="slots-cashout" class="slots-button slots-bottombutton"></button>
     </div>
   </div>
+  <div id="verify">
+    <div>
+      <label>Client seed</label>
+      <br />
+      <input id="client_seed" name="client_seed" type="text" value="(Your lucky number)" />
+    </div>
+    <div>
+      <label>Hash(server seed)</label>
+      <br />
+      <input id="hashed_server_seed" name="hashed_server_seed" type="text" value="" />
+    </div>
+    <div>
+      <label>Hash(Hash(client seed) + Hash(server seed))</label>
+      <br />
+      <input id="result_hash" name="result_hash" type="text" value="" />
+    </div>
+    
+  </div>
   <div id="statistic">
     <?php
       echo 'Last 20 transactions: <br />';
@@ -95,7 +113,8 @@ catch (Exception $e){
     </audio>
   </div>
   
-    <script src="js/sha256.js"></script>
+  <script src="js/sha256.js"></script>
+  <script src="js/sha1.js"></script>
   <script src="js/jquery.min.js"></script>
   <script src="js/slot.js"></script>
   <script src="bootstrap/js/bootstrap.min.js"></script>
@@ -201,10 +220,25 @@ catch (Exception $e){
           return false;
         }
         if (slot.isBitcoinConnected()){
-          
+          if (window.console) console.log('-==Start cashing out==-');
+          $.post("AjaxRequestsProcessing.php", { slot: "cashOut"})
+          .success(function(cashOut) {
+            //slot.statusDisplay.clear();
+            if (window.console) console.log('cashOut: '+cashOut);
+            //sync money after withdrawn
+            slot.syncWithServer();
+          })
+          .error(function(){
+            if (window.console) console.log('Bad request in isBitcoinConnected function');
+          })
         }
-        
       });
+      
+      //run once
+      slot.getHashedServerSeeds();
+      slot.getClientSeed();
+      
+      //run with given interval
       //setInterval('slot.isBitcoinConnected()', slot.bitcoinCheckConnectionInterval);
       
       //uncomment

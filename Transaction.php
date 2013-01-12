@@ -35,7 +35,7 @@ class Transaction {
   }
 
   public function get_from_db($transaction_id) {
-    $transaction_id = mysql_real_escape_string($transaction_id);
+//    $transaction_id = mysql_real_escape_string($transaction_id);
     $db = DBconfig::get_instance();
     $transaction = $db->mysqli_fetch_array('SELECT * FROM transactions WHERE transaction_id = \'' . $transaction_id . '\'');
     //if there is no user with given uid
@@ -55,15 +55,18 @@ class Transaction {
   }
   //endNum == 0 --> no limit
   public static function show_transactions($option = 'last', $startNum = 0, $endNum = 20, $from_date = '2012-11-01', $to_date = '2052-11-01', $from_page = 'index') {
-    $from_date = mysql_real_escape_string($from_date);
-    $to_date = mysql_real_escape_string($to_date);
-    $startNum = mysql_real_escape_string($startNum);
-    $endNum = mysql_real_escape_string($endNum);
+    $db = DBconfig::get_instance();
+    //????
+    //$db->mysqli_link->real_escape_string($from_date);
+//    $from_date = mysql_real_escape_string($from_date);
+//    $to_date = mysql_real_escape_string($to_date);
+//    $startNum = mysql_real_escape_string($startNum);
+//    $endNum = mysql_real_escape_string($endNum);
     $limit = "LIMIT  $startNum , $endNum";
     if ($endNum == 0)
       $limit = ' ';
-    $from_page = mysql_real_escape_string($from_page);;
-    $db = DBconfig::get_instance();
+//    $from_page = mysql_real_escape_string($from_page);;
+    
     //$t = new Transaction();
     //show last 20 by time
     if ($option == 'last') {
@@ -224,8 +227,8 @@ class Transaction {
 
   //just gives a total of all the money cashed out, sums up all the withdraw transactions
   public static function get_total_cached_out_money($from_date = '2012-11-01', $to_date = '2052-11-01'){
-    $from_date = mysql_real_escape_string($from_date);
-    $to_date = mysql_real_escape_string($to_date);
+//    $from_date = mysql_real_escape_string($from_date);
+//    $to_date = mysql_real_escape_string($to_date);
     
     $db = DBconfig::get_instance();
     $query = "SELECT SUM(money_amount) FROM transactions WHERE `deposit` = 0  AND `transaction_date` BETWEEN '$from_date' AND '$to_date'";
@@ -233,7 +236,7 @@ class Transaction {
     if (!$total_cached_out[0]){
       return 0;
     }
-    return $total_cached_out[0];
+    return round($total_cached_out[0], 2);
   }
   public static function get_total_cached_in_money($from_date = '2012-11-01', $to_date = '2052-11-01'){
     $from_date = mysql_real_escape_string($from_date);

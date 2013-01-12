@@ -35,8 +35,13 @@ class Randomizer {
   }
   
   //reinit generator of mt_rand() using mt_srand()
-  public function mt_srand(){
-    mt_srand();
+  public function mt_srand($seed = null){
+    if ($seed === null){
+      mt_srand();
+    }
+    else{
+      mt_srand($seed);
+    }
   }
   //return new random number using mt_rand()
   public function mt_rand(){

@@ -29,6 +29,28 @@ $slot = Slot::get_instance($user);
 
 
 switch ($post_request) {
+  case 'cashOut':
+    try{
+      $out =  $user->cash_out();
+      if ($out){
+        echo $out;
+      }
+      else{
+        //echo '{"cashOut":"0"}';
+        echo '0';
+      }
+    }
+    catch (Exception $e){
+      dump_it($e->getTraceAsString());
+    }
+    break;
+  case 'getHashedServerSeeds':
+    //$result_seeds = $slot->getResultSeeds();
+    $server_seeds = $slot->getHashedServerSeeds();
+    //dump_it($result_seeds);
+    $json = json_encode($server_seeds);
+    echo $json;
+    break;
   case 'sync':
     //todo: make auth!!
     //$user->get_from_db($user->uid);
@@ -39,44 +61,27 @@ switch ($post_request) {
     break;
   case 'spinPressed':
     //no bet
-    if (!isset($_POST['currentBet'])){
-      echo 'bet wasn\'t transferred';
+    if (!isset($_POST['currentBet']) || !isset($_POST['clientSeed'])){
+      echo 'bet wasn\'t transferred or client seed is wrong';
       return false;
     }
     //normal mode
+    $client_seed = $_POST['clientSeed'];
     $betFromClient = $_POST['currentBet'];
-    $json = json_encode($slot->spin($betFromClient));
+    //Array [Objs]
+    $json = json_encode($slot->spin($betFromClient, $client_seed));
     echo $json;
     break;
   case 'checkForIncommingPayment':
-//    $m = MyBitcoinClient::get_instance();
-//    //no incoming payments was made
-//    if ($m->can_connect() !== true){
-//      return false;
-//    }
-//    if ($m->getbalance($user->uid, 0) <= 0){
-//      echo 0;
-//      return false;
-//    }
-//    //incoming payments processing 
-//    if ($m->getbalance($user->uid, 0) > 0){
-//      //all money user have sent
-//      $user->money_balance = $m->getbalance($user->uid, 0);
-//      //( txid, all money, deposit = true, uid )
-//      $t = new Transaction('', $user->money_balance, true, $user->uid);
-//      //move money was sent by user to common slot account
-//      $m->move($user->uid, Slot::$bitcoin_account_name/*'SlotBank'*/, $m->getbalance($user->uid, 0), 0,'Move from the user account '.$user->uid.' to the common slot bitcoin account'.Slot::$bitcoin_account_name.' Money: '.$user->money_balance);
-//      $user->user_wallet = $user->get_user_wallet_by_uid();
-//      $user->save_in_db();
-//      $json = $user->money_balance;
-//    echo $json;
     $cashed_in_value = $user->cash_in();
     if ($cashed_in_value > 0){
       echo $cashed_in_value;
     }
     else{
       //no cashed in money
-      echo 0;
+      //echo json_encode(0);
+      //echo '{"cashOut":"0"}';
+      echo '0';
     }
     
     break;
@@ -133,9 +138,11 @@ switch ($post_request) {
       $table = 'Wrong params';
       //between from and to dates
       if (!empty($_POST['fromDate']) && !empty($_POST['toDate'])){// && !empty($_POST['option'])){
-        //$option = mysql_real_escape_string($_POST['option']);
-        $fromDate = mysql_real_escape_string($_POST['fromDate']);
-        $toDate = mysql_real_escape_string($_POST['toDate']);
+//$option = mysql_real_escape_string($_POST['option']);
+//        $fromDate = mysql_real_escape_string($_POST['fromDate']);
+//        $toDate = mysql_real_escape_string($_POST['toDate']);
+        $fromDate = ($_POST['fromDate']);
+        $toDate = ($_POST['toDate']);
         //if request from admin page
         if (!empty($_POST['page']) && $_POST['page'] == 'admin'){
           $table = Transaction::show_transactions('transactions',0, 0, $fromDate, $toDate, 'admin');
@@ -149,9 +156,12 @@ switch ($post_request) {
         }
       }
       if (!empty($_POST['to']) && !empty($_POST['option'])){
-        $option = mysql_real_escape_string($_POST['option']);
-        $from = mysql_real_escape_string($_POST['from']);
-        $to = mysql_real_escape_string($_POST['to']);
+//        $option = mysql_real_escape_string($_POST['option']);
+//        $from = mysql_real_escape_string($_POST['from']);
+//        $to = mysql_real_escape_string($_POST['to']);
+        $option = $_POST['option'];
+        $from = $_POST['from'];
+        $to = $_POST['to'];
         $table = Transaction::show_transactions($option, $from, $to);
       }
       echo $table;

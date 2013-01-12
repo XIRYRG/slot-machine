@@ -19,13 +19,16 @@ class Reel {
     $this->name = $name;
   }
   //return new symbol choosed randomly
-  public function get_new_randomly_choosed_symbol(){
-    //reinit generator
-    //mt_srand();
-    //choose the symbol number
-    //$rand_num = mt_rand(0, 63);
+  //args - (string $client_seed, string $server_seed)
+  public function get_new_randomly_choosed_symbol($client_seed, $server_seed){
+//    $server_seed = mt_rand(0, 1000000);
+    //$result_seed = $client_seed + $server_seed;
+    $client_seed = crc32($client_seed);
+    $server_seed = crc32($server_seed);
+    $result_seed = ($client_seed + $server_seed) % PHP_INT_MAX;
+    
     $randomizer = Randomizer::get_instance();
-    $randomizer->mt_srand();//reinit
+    $randomizer->mt_srand($result_seed);//reinit
     $rand_num = $randomizer->mt_rand();
     
     

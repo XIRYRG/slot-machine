@@ -23,20 +23,27 @@ class Slot {
   private function __construct(){}
   private function __clone(){} 
   private function __wakeup(){} 
-  public static function get_instance($user){
+  public static function get_instance($user = null){
     if (is_null(self::$slot)){
       self::$slot = new Slot();
       //if user not exist it will create him!
-      //self::$user = new User();
-      //self::$user = User::get_instance();
-      //self::$user->auth();
-      self::$user = $user;
+      if ($user == null){
+        self::$user = User::get_instance();
+      }
+      else{
+        self::$user = $user;
+      }
       //common account for all money in slot
       self::$bitcoin_account_name = 'SlotBank';
       
+      if (!empty($_SESSION['server_seeds'])){
+        self::$slot->server_seeds = $_SESSION['server_seeds'];
+      }
+      
+      
 
 
-
+      //todo: move getting bitcoin instance to separate method and use it only for the payment operations
       //uncomment
       
       $bitcoin_client_instance = MyBitcoinClient::get_instance();
@@ -97,7 +104,29 @@ class Slot {
   public $reel1,$reel2,$reel3, $reels;
   public $currentBet, $currentUserBalance, $lastBet, $state;
   public $playing, $paying_out;// = true;
-  
+  public $result_seeds, $server_seeds;
+
+
+  public function is_valid_client_seed($client_seed){
+    /* old
+    if (!is_numeric($client_seed)){
+      return false;
+    }
+    if ($client_seed >= 0 && $client_seed <= 1000000){
+      return true;
+    }
+    else{
+      return false;
+    }
+     * 
+     */
+    if (!is_string($client_seed)){
+      return false;
+    }
+    else{
+      return true;
+    }
+  }
 
   //validate client's bet 
   public function is_valid_bet($bet_from_client){
@@ -221,7 +250,7 @@ class Slot {
   }
 
   //make spin
-  public function spin($bet_from_client){
+  public function spin($bet_from_client, $client_seed){
     $this->get_option_from_db();
     if ($this->playing === 'off'){
       //echo 'Slot-machine powered off';
@@ -234,39 +263,113 @@ class Slot {
       //return '[Bet <= 0 or Bet not number.]';
       return -2;
     }
+    if (!$this->is_valid_client_seed($client_seed)){
+      return -3;
+    }
     $this->currentBet = $bet_from_client;
     //bet was 
     $this->lastBet = $this->currentBet;
     self::$user->money_balance -= $this->currentBet;
     $this->currentBet = 0;
-    $new_payline = $this->get_new_payline();
+    
+    //genearte array of 3 server seeds
+    //$server_seeds[$i] = mt_rand(0, 1000000);
+    //$new_payline = $this->get_new_payline($client_seed);
+    $arr_of_new_payline_and_servers_seeds = $this->get_new_payline_and_servers_seeds($client_seed);
+    $new_payline = $arr_of_new_payline_and_servers_seeds['new_payline'];
+    //$result_hashed_seeds = $arr_of_new_payline_and_servers_seeds['result_hashed_seeds'];
+//    dump_it($server_seeds);
     $paytable = Paytable::get_instance();
     $win_combination_name = $paytable->paylines_matching_with_wins($new_payline);
     //user gets money he won
     $won_money = $paytable->payoff_value($new_payline) * $bet_from_client;
     self::$user->money_balance += $won_money;
     //...
+    
     $new_payline->bet_from_client = $bet_from_client;
     $new_payline->multiplier = $paytable->payoff_value($new_payline);
-    
+    //keep last payline//not used(?)
     $this->last_payline = $new_payline;
     $s = self::$user->save_in_db();
     self::$user->update_from_db();
     //logging every spin (by default)
     if (self::$log_every_spin)
       $this->save_spin_in_db(self::$user->uid, $bet_from_client, $win_combination_name, $won_money );
-    return $new_payline;
+    //return $new_payline;
+    $arr_of_new_payline_and_servers_seeds['new_payline']->bet_from_client = $new_payline->bet_from_client;
+    $arr_of_new_payline_and_servers_seeds['new_payline']->multiplier = $new_payline->multiplier;
+    return $arr_of_new_payline_and_servers_seeds;
   }
 
-  //return new randomly generated payline
-  public function get_new_payline(){
+  //return array [ new randomly generated payline; and array of 3 server seeds ]
+  //get new random number for all 3 reel..
+  public function get_new_payline_and_servers_seeds($client_seed){
+    //hash client seed
+//    dump_it($client_seed);
+    $client_seed = sha1($client_seed);
+//    dump_it($client_seed);
+    //generate new server seeds
+    $server_seeds = $this->getServerSeeds();
+    //$server_seeds = generateServerSeeds();
     for ($i = 0; $i < 3; $i++){
-      $syms[$i] = $this->reels[$i]->get_new_randomly_choosed_symbol();
+      //hash all 3 server seeds
+      //$server_seeds[$i] = sha1(mt_rand());
+      
+      //$result_hashed_seeds[$i] = sha1($client_seed.$server_seeds[$i]);
+      //..using client and server seed
+      $syms[$i] = $this->reels[$i]->get_new_randomly_choosed_symbol($client_seed, $server_seeds[$i]);
     }
+//    dump_it($result_hashed_seeds);
     $new_payline = new Payline($syms[0], $syms[1], $syms[2]);
-    return $new_payline;
+    //save last result seeds and server seeds
+    //$_SESSION['server_seeds'] = $server_seeds;
+    //$this->result_seeds = $result_hashed_seeds;
+    //$this->server_seeds = $server_seeds;
+    //return $new_payline;
+    
+    //generate new seeds HERE, because last seeds was used for getting payline above in this func
+    $this->generateServerSeeds();
+    $res_arr = array('new_payline' => $new_payline, 'server_seeds' => $server_seeds);
+    return $res_arr;
   }
   
+//  public function getResultSeeds(){
+//    return $this->result_seeds;
+//  }
+
+  //get random generated 3 server seeds
+  public function generateServerSeeds(){
+    mt_srand(microtime(true));
+    for ($i = 0; $i < 3; $i++){
+      $server_seeds[$i] = sha1(mt_rand());
+    }
+    $this->server_seeds = $server_seeds;
+    $_SESSION['server_seeds'] = $server_seeds;
+    return $server_seeds;
+  }
+  //just get 3 current server seeds
+  public function getServerSeeds(){
+    if (!empty($this->server_seeds)){// && empty($_SESSION['server_seeds'])){
+      return $this->server_seeds;
+    }
+    elseif (!empty($_SESSION['server_seeds'])){
+      $this->server_seeds = $_SESSION['server_seeds'];
+      //return $this->server_seeds;
+    }
+    else{
+      $this->generateServerSeeds();
+    }
+    return $this->server_seeds;
+  }
+  public function getHashedServerSeeds(){
+    $server_seeds = $this->getServerSeeds();
+    $json_server_seeds = json_encode($server_seeds);
+//    for ($i = 0; $i < 3; $i++){
+//      $server_seeds[$i] = sha1($server_seeds[$i]);
+//    }
+    //wanna string? got it!
+    return sha1($json_server_seeds);
+  }
 }
 
 class WeightTable{
