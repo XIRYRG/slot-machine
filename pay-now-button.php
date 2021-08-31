@@ -5,7 +5,7 @@
   </head>
   <body>
     <div style="font-size:16px;margin:10px;width:300px" class="blockchain-btn"
-       data-address="1EqDePiYaJdMNHjF5ahpHt5Uv3QLfRLZna"
+       data-address="3B3zps3udeGNtHVqb6FehTfejo56Psy3TZ
        data-anonymous="false"
        data-callback="https://mydomain.com/callback_url">
       <div class="blockchain stage-begin">
